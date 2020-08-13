@@ -1,6 +1,6 @@
 #include <string.h>
 #include <stdlib.h>
-#include <unistd.h>
+#include "rlite/port/unistd.h"
 #include "greatest.h"
 #include "rlite/hirlite.h"
 

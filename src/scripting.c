@@ -33,6 +33,7 @@
 #include "rlite/sha1.h"
 #include "rlite/rand.h"
 #include "rlite/constants.h"
+#include "rlite/port/unistd.h"
 
 #include <lua.h>
 #include <lauxlib.h>
@@ -48,9 +49,9 @@
 #define RLITE_DEFAULT_VERBOSITY RLITE_NOTICE
 
 void sha1hex(char *digest, char *script, size_t len);
-static int setScript(rliteClient *c, char *script, long scriptlen) {
+static int setScript(rliteClient *c, char *script, int64_t scriptlen) {
 	int retval;
-	char hash[40];
+	char hash[41];
 	sha1hex(hash, script, scriptlen);
 	RL_CALL(rl_select_internal, RL_OK, c->context->db, RLITE_INTERNAL_DB_LUA);
 
@@ -61,7 +62,7 @@ cleanup:
 	return retval;
 }
 
-static int getScript(rliteClient *c, char hash[40], char **script, long *scriptlen) {
+static int getScript(rliteClient *c, char hash[40], char **script, int64_t *scriptlen) {
 	int retval;
 	RL_CALL(rl_select_internal, RL_OK, c->context->db, RLITE_INTERNAL_DB_LUA);
 
@@ -217,8 +218,8 @@ static rliteClient *lua_caller = NULL;
 static rliteClient *lua_client = NULL;
 static int lua_random_dirty;
 static int lua_write_dirty;
-static unsigned long long lua_time_start;
-static unsigned long long lua_time_limit;
+static uint64_t lua_time_start;
+static uint64_t lua_time_limit;
 static int lua_timedout;
 static int lua_kill;
 
@@ -480,11 +481,11 @@ int luaLogCommand(lua_State *lua) {
 }
 
 void luaMaskCountHook(lua_State *lua, lua_Debug *UNUSED(ar)) {
-	unsigned long long elapsed;
+	uint64_t elapsed;
 
 	elapsed = rl_mstime() - lua_time_start;
 	if (elapsed >= lua_time_limit && lua_timedout == 0) {
-		rliteLog(RLITE_WARNING,"Lua slow script detected: still in execution after %lld milliseconds. You can try killing the script using the SCRIPT KILL command.",elapsed);
+		rliteLog(RLITE_WARNING,"Lua slow script detected: still in execution after %" PRId64 " milliseconds. You can try killing the script using the SCRIPT KILL command.",elapsed);
 		lua_timedout = 1;
 	}
 	if (lua_kill) {
@@ -754,7 +755,7 @@ void luaReplyToRedisReply(rliteClient *c, lua_State *lua) {
 		}
 		break;
 	case LUA_TNUMBER:
-		c->reply = createLongLongObject((long long)lua_tonumber(lua,-1));
+		c->reply = createLongLongObject((int64_t)lua_tonumber(lua,-1));
 		break;
 	case LUA_TTABLE:
 		/* We need to check if it is an array, an error, or a status reply.
@@ -827,7 +828,7 @@ void luaSetGlobalArray(lua_State *lua, char *var, char **elev, size_t *elevlen, 
 }
 
 /* Define a lua function with the specified function name and body.
- * The function name musts be a 2 characters long string, since all the
+ * The function name musts be a 2 characters int64_t string, since all the
  * functions we defined in the Lua context are in the form:
  *
  *   f_<hex sha1 sum>
@@ -897,7 +898,7 @@ void evalGenericCommand(rliteClient *c, int evalsha) {
 	scriptingInit();
 	lua_client->context = c->context;
 	char funcname[43];
-	long long numkeys;
+	int64_t numkeys;
 	int delhook = 0, err;
 
 	/* We want the same PRNG sequence at every call so that our PRNG is
@@ -947,7 +948,7 @@ void evalGenericCommand(rliteClient *c, int evalsha) {
 		funcname[42] = '\0';
 
 		char *body;
-		long bodylen;
+		int64_t bodylen;
 		int retval = getScript(c, funcname + 2, &body, &bodylen);
 		if (retval != RL_OK) {
 			c->reply = createErrorObject(RLITE_NOSCRIPTERR);
@@ -1025,7 +1026,7 @@ void evalGenericCommand(rliteClient *c, int evalsha) {
 	 * for every command uses too much CPU. */
 	#define LUA_GC_CYCLE_PERIOD 50
 	{
-		static long gc_count = 0;
+		static int64_t gc_count = 0;
 
 		gc_count++;
 		if (gc_count == LUA_GC_CYCLE_PERIOD) {

@@ -13,9 +13,9 @@ TEST basic_test_set_get(int _commit)
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *value = UNSIGN("my value"), *testvalue;
-	long valuelen = strlen((char *)value), testvaluelen;
+	int64_t valuelen = strlen((char *)value), testvaluelen;
 
 	RL_CALL_VERBOSE(rl_set, RL_OK, db, key, keylen, value, valuelen, 0, 0);
 	RL_BALANCED();
@@ -35,9 +35,9 @@ TEST basic_test_set_delete_get(int _commit)
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *value = UNSIGN("my value");
-	long valuelen = strlen((char *)value);
+	int64_t valuelen = strlen((char *)value);
 
 	RL_CALL_VERBOSE(rl_set, RL_OK, db, key, keylen, value, valuelen, 0, 0);
 	RL_BALANCED();
@@ -58,13 +58,13 @@ TEST basic_test_set_set_get(int _commit)
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *value = UNSIGN("my value");
-	long valuelen = strlen((char *)value);
+	int64_t valuelen = strlen((char *)value);
 	unsigned char *value2 = UNSIGN("my value2");
-	long value2len = strlen((char *)value2);
+	int64_t value2len = strlen((char *)value2);
 	unsigned char *testvalue;
-	long testvaluelen;
+	int64_t testvaluelen;
 
 	RL_CALL_VERBOSE(rl_set, RL_OK, db, key, keylen, value, valuelen, 0, 0);
 	RL_BALANCED();
@@ -87,9 +87,9 @@ TEST basic_test_set_getrange(int _commit)
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *value = UNSIGN("my value"), *testvalue;
-	long valuelen = strlen((char *)value), testvaluelen;
+	int64_t valuelen = strlen((char *)value), testvaluelen;
 
 	RL_CALL_VERBOSE(rl_set, RL_OK, db, key, keylen, value, valuelen, 0, 0);
 	RL_BALANCED();
@@ -109,13 +109,13 @@ TEST basic_test_set_setrange(int _commit)
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *value = UNSIGN("my value"), *testvalue;
-	long valuelen = strlen((char *)value), testvaluelen;
+	int64_t valuelen = strlen((char *)value), testvaluelen;
 	unsigned char *updatevalue = UNSIGN(" new value");
-	long updatevaluelen = strlen((char *)updatevalue), newlen;
+	int64_t updatevaluelen = strlen((char *)updatevalue), newlen;
 	unsigned char *expectedvalue = UNSIGN("my new value");
-	long expectedvaluelen = strlen((char *)expectedvalue);
+	int64_t expectedvaluelen = strlen((char *)expectedvalue);
 
 	RL_CALL_VERBOSE(rl_set, RL_OK, db, key, keylen, value, valuelen, 0, 0);
 	RL_BALANCED();
@@ -139,10 +139,10 @@ TEST basic_test_append(int _commit)
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *value = UNSIGN("my value"), *testvalue;
-	long valuelen = strlen((char *)value), testvaluelen;
-	long firstchunklen = 2;
+	int64_t valuelen = strlen((char *)value), testvaluelen;
+	int64_t firstchunklen = 2;
 
 	RL_CALL_VERBOSE(rl_append, RL_OK, db, key, keylen, value, firstchunklen, &testvaluelen);
 	RL_BALANCED();
@@ -167,13 +167,13 @@ TEST basic_test_setnx_setnx_get(int _commit)
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *value = UNSIGN("my value");
-	long valuelen = strlen((char *)value);
+	int64_t valuelen = strlen((char *)value);
 	unsigned char *value2 = UNSIGN("my value2");
-	long value2len = strlen((char *)value2);
+	int64_t value2len = strlen((char *)value2);
 	unsigned char *testvalue;
-	long testvaluelen;
+	int64_t testvaluelen;
 
 	RL_CALL_VERBOSE(rl_set, RL_OK, db, key, keylen, value, valuelen, 1, 0);
 	RL_BALANCED();
@@ -196,10 +196,10 @@ TEST basic_test_set_expiration(int _commit)
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *value = UNSIGN("my value");
-	long valuelen = strlen((char *)value);
-	unsigned long long expiration = rl_mstime() + 12983, testexpiration;
+	int64_t valuelen = strlen((char *)value);
+	uint64_t expiration = rl_mstime() + 12983, testexpiration;
 
 	RL_CALL_VERBOSE(rl_set, RL_OK, db, key, keylen, value, valuelen, 0, expiration);
 	RL_BALANCED();
@@ -218,9 +218,9 @@ TEST basic_test_set_strlen(int _commit)
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *value = UNSIGN("my value");
-	long valuelen = strlen((char *)value), testvaluelen;
+	int64_t valuelen = strlen((char *)value), testvaluelen;
 
 	RL_CALL_VERBOSE(rl_set, RL_OK, db, key, keylen, value, valuelen, 0, 0);
 	RL_BALANCED();
@@ -239,13 +239,13 @@ TEST basic_test_set_incr(int _commit)
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *testvalue;
-	long testvaluelen;
-	long long testnewvalue;
-	long long v1 = 123, v2 = 456;
-	long long expectednewvalue = v1 + v2;
-	long expectedvaluelen = 3;
+	int64_t testvaluelen;
+	int64_t testnewvalue;
+	int64_t v1 = 123, v2 = 456;
+	int64_t expectednewvalue = v1 + v2;
+	int64_t expectedvaluelen = 3;
 
 	RL_CALL_VERBOSE(rl_incr, RL_OK, db, key, keylen, v1, &testnewvalue);
 	RL_BALANCED();
@@ -269,10 +269,10 @@ TEST basic_test_set_incrbyfloat(int _commit)
 
 	rlite *db = NULL;
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *testvalue;
 	char *testvalue2 = NULL;
-	long testvaluelen;
+	int64_t testvaluelen;
 	double testnewvalue;
 	double v1 = 7.8, v2 = 2.1;
 	double expectednewvalue = v1 + v2;
@@ -306,11 +306,11 @@ TEST basic_test_set_getbit(int _commit)
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *value = UNSIGN("ab");
-	long valuelen = strlen((char *)value);
+	int64_t valuelen = strlen((char *)value);
 	int bitvalue;
-	long i;
+	int64_t i;
 
 	RL_CALL_VERBOSE(rl_set, RL_OK, db, key, keylen, value, valuelen, 0, 0);
 	RL_BALANCED();
@@ -332,21 +332,21 @@ TEST basic_test_set_bitop(int _commit)
 
 	rlite *db = NULL;
 	unsigned char *k1 = UNSIGN("key 1");
-	long k1len = strlen((char *)k1);
+	int64_t k1len = strlen((char *)k1);
 	unsigned char *v1 = UNSIGN("foobar");
-	long v1len = strlen((char *)v1);
+	int64_t v1len = strlen((char *)v1);
 	unsigned char *k2 = UNSIGN("key 2");
-	long k2len = strlen((char *)k2);
+	int64_t k2len = strlen((char *)k2);
 	unsigned char *v2 = UNSIGN("abcdef");
-	long v2len = strlen((char *)v2);
+	int64_t v2len = strlen((char *)v2);
 	unsigned char *targetk = UNSIGN("key 2");
-	long targetklen = strlen((char *)targetk);
+	int64_t targetklen = strlen((char *)targetk);
 	unsigned char *expected = UNSIGN("`bc`ab");
-	long expectedlen = strlen((char *)expected);
+	int64_t expectedlen = strlen((char *)expected);
     const unsigned char *keys[2] = {k1, k2};
-    long keyslen[2] = {k1len, k2len};
+    int64_t keyslen[2] = {k1len, k2len};
 	unsigned char *testvalue;
-	long testvaluelen;
+	int64_t testvaluelen;
 
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
@@ -368,10 +368,10 @@ TEST basic_test_set_bitcount(int _commit)
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *value = UNSIGN("foobar");
-	long valuelen = strlen((char *)value);
-	long bitcount;
+	int64_t valuelen = strlen((char *)value);
+	int64_t bitcount;
 
 	RL_CALL_VERBOSE(rl_set, RL_OK, db, key, keylen, value, valuelen, 0, 0);
 	RL_BALANCED();
@@ -407,17 +407,17 @@ TEST basic_test_set_bitpos(int _commit)
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *value = UNSIGN("\xff\xf0\x00");
-	long valuelen = 3;
+	int64_t valuelen = 3;
 	unsigned char *value2 = UNSIGN("\x00\xff\xf0");
-	long value2len = 3;
-	long bitpos;
+	int64_t value2len = 3;
+	int64_t bitpos;
 
 	RL_CALL_VERBOSE(rl_set, RL_OK, db, key, keylen, value, valuelen, 0, 0);
 	RL_BALANCED();
 
-	//  int rl_bitpos(struct rlite *db, const unsigned char *key, long keylen, int bit, long start, long stop, int end_given, long *position)
+	//  int rl_bitpos(struct rlite *db, const unsigned char *key, int64_t keylen, int bit, int64_t start, int64_t stop, int end_given, int64_t *position)
 	RL_CALL_VERBOSE(rl_bitpos, RL_OK, db, key, keylen, 0, 0, -1, 0, &bitpos);
 	EXPECT_LONG(bitpos, 12);
 
@@ -440,18 +440,18 @@ TEST basic_test_pfadd(int _commit)
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *value = UNSIGN("asd");
-	long valuelen = 3;
+	int64_t valuelen = 3;
 	unsigned char *value2 = UNSIGN("qwe");
-	long value2len = 3;
+	int64_t value2len = 3;
 	unsigned char *value3 = UNSIGN("zxc");
-	long value3len = 3;
+	int64_t value3len = 3;
 
 	unsigned char *values[] = {value, value2};
-	long valueslen[] = {valuelen, value2len};
+	int64_t valueslen[] = {valuelen, value2len};
 	int updated = -1;
-	unsigned long long expires = rl_mstime() + 100000, testexpires;
+	uint64_t expires = rl_mstime() + 100000, testexpires;
 
 	RL_CALL_VERBOSE(rl_pfadd, RL_OK, db, key, keylen, 2, values, valueslen, &updated);
 	RL_BALANCED();
@@ -486,21 +486,21 @@ TEST basic_test_pfadd_pfcount(int _commit)
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *key2 = UNSIGN("my key2");
-	long key2len = strlen((char *)key2);
+	int64_t key2len = strlen((char *)key2);
 	unsigned char *value = UNSIGN("asd");
-	long valuelen = 3;
+	int64_t valuelen = 3;
 	unsigned char *value2 = UNSIGN("qwe");
-	long value2len = 3;
+	int64_t value2len = 3;
 	unsigned char *value3 = UNSIGN("zxc");
-	long value3len = 3;
-	long count;
+	int64_t value3len = 3;
+	int64_t count;
 
 	unsigned char *values[] = {value, value2};
-	long valueslen[] = {valuelen, value2len};
+	int64_t valueslen[] = {valuelen, value2len};
 	unsigned char *keys[] = {key, key2};
-	long keyslen[] = {keylen, key2len};
+	int64_t keyslen[] = {keylen, key2len};
 
 	RL_CALL_VERBOSE(rl_pfadd, RL_OK, db, key, keylen, 2, values, valueslen, NULL);
 	RL_BALANCED();
@@ -525,19 +525,19 @@ TEST basic_test_pfadd_pfmerge(int _commit)
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *key2 = UNSIGN("my key2");
-	long key2len = strlen((char *)key2);
+	int64_t key2len = strlen((char *)key2);
 	unsigned char *value = UNSIGN("asd");
-	long valuelen = 3;
+	int64_t valuelen = 3;
 	unsigned char *value2 = UNSIGN("qwe");
-	long value2len = 3;
+	int64_t value2len = 3;
 	unsigned char *value3 = UNSIGN("zxc");
-	long value3len = 3;
-	long count;
+	int64_t value3len = 3;
+	int64_t count;
 
 	unsigned char *values[] = {value, value2};
-	long valueslen[] = {valuelen, value2len};
+	int64_t valueslen[] = {valuelen, value2len};
 
 	RL_CALL_VERBOSE(rl_pfadd, RL_OK, db, key, keylen, 2, values, valueslen, NULL);
 	RL_BALANCED();
@@ -560,11 +560,11 @@ TEST basic_test_pfadd_pfdebug_getreg(int _commit)
 
 	rlite *db = NULL;
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *value = UNSIGN("1");
-	long valuelen = 1;
+	int64_t valuelen = 1;
 	int size, i;
-	long *elements = NULL;
+	int64_t *elements = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
 	RL_CALL_VERBOSE(rl_pfadd, RL_OK, db, key, keylen, 1, &value, &valuelen, NULL);
@@ -588,11 +588,11 @@ TEST basic_test_pfadd_pfdebug_decode(int _commit)
 
 	rlite *db = NULL;
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *value = UNSIGN("1");
-	long valuelen = 1;
+	int64_t valuelen = 1;
 	unsigned char *decode = NULL;
-	long decodelen = 0;
+	int64_t decodelen = 0;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
 	RL_CALL_VERBOSE(rl_pfadd, RL_OK, db, key, keylen, 1, &value, &valuelen, NULL);
@@ -600,7 +600,7 @@ TEST basic_test_pfadd_pfdebug_decode(int _commit)
 
 	RL_CALL_VERBOSE(rl_pfdebug_decode, RL_OK, db, key, keylen, &decode, &decodelen);
 	const char *expect = "Z:7527 v:1,1 Z:8856";
-	long expectlen = strlen(expect);
+	int64_t expectlen = strlen(expect);
 	EXPECT_BYTES(expect, expectlen, decode, decodelen);
 
 	free(decode);
@@ -614,11 +614,11 @@ TEST basic_test_pfadd_pfdebug_encoding(int _commit)
 
 	rlite *db = NULL;
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *value = UNSIGN("1");
-	long valuelen = 1;
+	int64_t valuelen = 1;
 	unsigned char *encoding = NULL;
-	long encodinglen = 0;
+	int64_t encodinglen = 0;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
 	RL_CALL_VERBOSE(rl_pfadd, RL_OK, db, key, keylen, 1, &value, &valuelen, NULL);
@@ -626,7 +626,7 @@ TEST basic_test_pfadd_pfdebug_encoding(int _commit)
 
 	RL_CALL_VERBOSE(rl_pfdebug_encoding, RL_OK, db, key, keylen, &encoding, &encodinglen);
 	const char *expect = "sparse";
-	long expectlen = strlen(expect);
+	int64_t expectlen = strlen(expect);
 	EXPECT_BYTES(expect, expectlen, encoding, encodinglen);
 
 	free(encoding);
@@ -640,11 +640,11 @@ TEST basic_test_pfadd_pfdebug_todense(int _commit)
 
 	rlite *db = NULL;
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *value = UNSIGN("1");
-	long valuelen = 1;
+	int64_t valuelen = 1;
 	unsigned char *encoding = NULL;
-	long encodinglen = 0;
+	int64_t encodinglen = 0;
 	int changed;
 
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
@@ -657,7 +657,7 @@ TEST basic_test_pfadd_pfdebug_todense(int _commit)
 
 	RL_CALL_VERBOSE(rl_pfdebug_encoding, RL_OK, db, key, keylen, &encoding, &encodinglen);
 	const char *expect = "dense";
-	long expectlen = strlen(expect);
+	int64_t expectlen = strlen(expect);
 	EXPECT_BYTES(expect, expectlen, encoding, encodinglen);
 
 	RL_CALL_VERBOSE(rl_pfdebug_todense, RL_OK, db, key, keylen, &changed);
@@ -675,7 +675,7 @@ TEST basic_test_pfadd_empty(int _commit)
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	int updated;
 
 	RL_CALL_VERBOSE(rl_pfadd, RL_OK, db, key, keylen, 0, NULL, NULL, &updated);

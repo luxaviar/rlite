@@ -1,5 +1,5 @@
 #include <string.h>
-#include <unistd.h>
+#include "rlite/port/unistd.h"
 #include <pthread.h>
 #include "rlite/rlite.h"
 #include "util.h"
@@ -14,9 +14,9 @@ TEST test_full_wal(int _commit) {
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *value = UNSIGN("my value"), *testvalue;
-	long valuelen = strlen((char *)value), testvaluelen;
+	int64_t valuelen = strlen((char *)value), testvaluelen;
 
 	RL_CALL_VERBOSE(rl_set, RL_OK, db, key, keylen, value, valuelen, 0, 0);
 	RL_CALL_VERBOSE(rl_write_wal, RL_OK, wal_path, db, NULL, NULL);
@@ -40,9 +40,9 @@ TEST test_full_wal_readonly(int _commit) {
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *value = UNSIGN("my value"), *testvalue;
-	long valuelen = strlen((char *)value), testvaluelen;
+	int64_t valuelen = strlen((char *)value), testvaluelen;
 
 	RL_CALL_VERBOSE(rl_set, RL_OK, db, key, keylen, value, valuelen, 0, 0);
 	RL_CALL_VERBOSE(rl_write_wal, RL_OK, wal_path, db, NULL, NULL);
@@ -67,9 +67,9 @@ TEST test_partial_wal(int _commit) {
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *value = UNSIGN("my value");
-	long valuelen = strlen((char *)value);
+	int64_t valuelen = strlen((char *)value);
 
 	RL_CALL_VERBOSE(rl_set, RL_OK, db, key, keylen, value, valuelen, 0, 0);
 	RL_CALL_VERBOSE(rl_write_wal, RL_OK, wal_path, db, NULL, NULL);
@@ -90,13 +90,13 @@ TEST test_partial_wal_readonly(int _commit) {
 	rlite *db;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *value = UNSIGN("my value");
-	long valuelen = strlen((char *)value);
+	int64_t valuelen = strlen((char *)value);
 	unsigned char *key2 = UNSIGN("my key2");
-	long key2len = strlen((char *)key2);
+	int64_t key2len = strlen((char *)key2);
 	unsigned char *value2 = UNSIGN("my value2");
-	long value2len = strlen((char *)value2);
+	int64_t value2len = strlen((char *)value2);
 
 	// We need to make sure the database exiss before opening in read only
 	RL_CALL_VERBOSE(rl_set, RL_OK, db, key2, key2len, value2, value2len, 0, 0);

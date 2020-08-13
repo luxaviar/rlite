@@ -47,6 +47,10 @@ void rl_free(void *ptr);
 	retval = func(__VA_ARGS__);\
 	if (expected != retval && expected2 != retval) goto cleanup;
 
+#define RL_CALL_EXACT2(func, expected, arg1, arg2)\
+	retval = func(arg1, arg2);\
+	if (expected != retval) goto cleanup;
+
 #ifdef __GNUC__
 #  define UNUSED(x) UNUSED_ ## x __attribute__((__unused__))
 #else
@@ -54,9 +58,9 @@ void rl_free(void *ptr);
 #endif
 
 int get_4bytes(const unsigned char *p);
-void put_4bytes(unsigned char *p, long v);
-unsigned long long get_8bytes(const unsigned char *p);
-void put_8bytes(unsigned char *p, unsigned long long v);
+void put_4bytes(unsigned char *p, int64_t v);
+uint64_t get_8bytes(const unsigned char *p);
+void put_8bytes(unsigned char *p, uint64_t v);
 int long_cmp(void *v1, void *v2);
 int sha1_cmp(void *v1, void *v2);
 int double_cmp(void *v1, void *v2);
@@ -67,9 +71,9 @@ int double_formatter(void *v2, char **formatted, int *size);
 int sha1_formatter(void *v2, char **formatted, int *size);
 double get_double(const unsigned char *p);
 void put_double(unsigned char *p, double v);
-int sha1(const unsigned char *data, long datalen, unsigned char digest[20]);
-unsigned long long rl_mstime();
-double rl_strtod(unsigned char *str, long strlen, unsigned char **eptr);
+int sha1(const unsigned char *data, int64_t datalen, unsigned char digest[20]);
+uint64_t rl_mstime();
+double rl_strtod(unsigned char *str, int64_t strlen, unsigned char **eptr);
 char *rl_get_filename_with_suffix(const char *filename, char *suffix);
 
 #endif

@@ -5,7 +5,7 @@
 #include "rlite/page_btree.h"
 #include "rlite/util.h"
 
-static int rl_set_create(rlite *db, long btree_page, rl_btree **btree)
+static int rl_set_create(rlite *db, int64_t btree_page, rl_btree **btree)
 {
 	rl_btree *set = NULL;
 
@@ -20,7 +20,7 @@ cleanup:
 	return retval;
 }
 
-static int rl_set_read(rlite *db, long set_page_number, rl_btree **btree)
+static int rl_set_read(rlite *db, int64_t set_page_number, rl_btree **btree)
 {
 	void *tmp;
 	int retval;
@@ -33,11 +33,11 @@ cleanup:
 	return retval;
 }
 
-int rl_set_get_objects(rlite *db, const unsigned char *key, long keylen, long *_set_page_number, rl_btree **btree, int update_version, int create)
+int rl_set_get_objects(rlite *db, const unsigned char *key, int64_t keylen, int64_t *_set_page_number, rl_btree **btree, int update_version, int create)
 {
-	long set_page_number, version;
+	int64_t set_page_number, version;
 	int retval;
-	unsigned long long expires = 0;
+	uint64_t expires = 0;
 	if (create) {
 		retval = rl_key_get_or_create(db, key, keylen, RL_TYPE_SET, &set_page_number, &version);
 		if (retval != RL_FOUND && retval != RL_NOT_FOUND) {
@@ -72,14 +72,14 @@ cleanup:
 	}
 	return retval;
 }
-int rl_sadd(struct rlite *db, const unsigned char *key, long keylen, int memberc, unsigned char **members, long *memberslen, long *added)
+int rl_sadd(struct rlite *db, const unsigned char *key, int64_t keylen, int memberc, unsigned char **members, int64_t *memberslen, int64_t *added)
 {
 	int i, retval;
-	long set_page_number;
+	int64_t set_page_number;
 	rl_btree *set;
 	unsigned char *digest = NULL;
-	long *member = NULL;
-	long count = 0;
+	int64_t *member = NULL;
+	int64_t count = 0;
 	void *tmp;
 	RL_CALL(rl_set_get_objects, RL_OK, db, key, keylen, &set_page_number, &set, 1, 1);
 
@@ -114,15 +114,15 @@ cleanup:
 	return retval;
 }
 
-int rl_srem(struct rlite *db, const unsigned char *key, long keylen, int membersc, unsigned char **members, long *memberslen, long *delcount)
+int rl_srem(struct rlite *db, const unsigned char *key, int64_t keylen, int membersc, unsigned char **members, int64_t *memberslen, int64_t *delcount)
 {
 	int retval;
-	long set_page_number;
+	int64_t set_page_number;
 	rl_btree *set;
-	long member;
+	int64_t member;
 	void *tmp;
-	long i;
-	long deleted = 0;
+	int64_t i;
+	int64_t deleted = 0;
 	int keydeleted = 0;
 	unsigned char digest[20];
 	RL_CALL(rl_set_get_objects, RL_OK, db, key, keylen, &set_page_number, &set, 1, 0);
@@ -132,7 +132,7 @@ int rl_srem(struct rlite *db, const unsigned char *key, long keylen, int members
 		retval = rl_btree_find_score(db, set, digest, &tmp, NULL, NULL);
 		if (retval == RL_FOUND) {
 			deleted++;
-			member = *(long *)tmp;
+			member = *(int64_t *)tmp;
 			rl_multi_string_delete(db, member);
 			retval = rl_btree_remove_element(db, set, set_page_number, digest);
 			if (retval != RL_OK && retval != RL_DELETED) {
@@ -155,10 +155,10 @@ cleanup:
 	return retval;
 }
 
-int rl_sismember(struct rlite *db, const unsigned char *key, long keylen, unsigned char *member, long memberlen)
+int rl_sismember(struct rlite *db, const unsigned char *key, int64_t keylen, unsigned char *member, int64_t memberlen)
 {
 	int retval;
-	long set_page_number;
+	int64_t set_page_number;
 	rl_btree *set;
 	unsigned char digest[20];
 	RL_CALL(rl_set_get_objects, RL_OK, db, key, keylen, &set_page_number, &set, 0, 0);
@@ -170,10 +170,10 @@ cleanup:
 	return retval;
 }
 
-int rl_scard(struct rlite *db, const unsigned char *key, long keylen, long *card)
+int rl_scard(struct rlite *db, const unsigned char *key, int64_t keylen, int64_t *card)
 {
 	int retval;
-	long set_page_number;
+	int64_t set_page_number;
 	rl_btree *set;
 	RL_CALL(rl_set_get_objects, RL_OK, db, key, keylen, &set_page_number, &set, 0, 0);
 
@@ -182,11 +182,11 @@ cleanup:
 	return retval;
 }
 
-int rl_smove(struct rlite *db, const unsigned char *source, long sourcelen, const unsigned char *destination, long destinationlen, unsigned char *member, long memberlen)
+int rl_smove(struct rlite *db, const unsigned char *source, int64_t sourcelen, const unsigned char *destination, int64_t destinationlen, unsigned char *member, int64_t memberlen)
 {
 	rl_btree *source_hash, *target_hash;
 	void *tmp;
-	long target_page_number, source_page_number, *member_page_number;
+	int64_t target_page_number, source_page_number, *member_page_number;
 	int retval;
 	unsigned char *digest = NULL;
 	// make sure the target key is a set or does not exist
@@ -197,7 +197,7 @@ int rl_smove(struct rlite *db, const unsigned char *source, long sourcelen, cons
 	RL_CALL(rl_set_get_objects, RL_OK, db, source, sourcelen, &source_page_number, &source_hash, 1, 0);
 	retval = rl_btree_find_score(db, source_hash, digest, &tmp, NULL, NULL);
 	if (retval == RL_FOUND) {
-		rl_multi_string_delete(db, *(long *)tmp);
+		rl_multi_string_delete(db, *(int64_t *)tmp);
 		retval = rl_btree_remove_element(db, source_hash, source_page_number, digest);
 		if (retval == RL_DELETED) {
 			RL_CALL(rl_key_delete, RL_OK, db, source, sourcelen);
@@ -220,13 +220,13 @@ cleanup:
 	return retval;
 }
 
-int rl_set_iterator_next(rl_set_iterator *iterator, long *_page, unsigned char **member, long *memberlen)
+int rl_set_iterator_next(rl_set_iterator *iterator, int64_t *_page, unsigned char **member, int64_t *memberlen)
 {
 	void *tmp;
-	long page;
+	int64_t page;
 	int retval = rl_btree_iterator_next(iterator, NULL, &tmp);
 	if (retval == RL_OK) {
-		page = *(long *)tmp;
+		page = *(int64_t *)tmp;
 		if (_page) {
 			*_page = page;
 		}
@@ -244,7 +244,7 @@ int rl_set_iterator_destroy(rl_set_iterator *iterator)
 	return rl_btree_iterator_destroy(iterator);
 }
 
-int rl_smembers(struct rlite *db, rl_set_iterator **iterator, const unsigned char *key, long keylen)
+int rl_smembers(struct rlite *db, rl_set_iterator **iterator, const unsigned char *key, int64_t keylen)
 {
 	int retval;
 	rl_btree *set;
@@ -254,9 +254,9 @@ cleanup:
 	return retval;
 }
 
-static int contains(long size, long *elements, long element)
+static int contains(int64_t size, int64_t *elements, int64_t element)
 {
-	long i;
+	int64_t i;
 	for (i = 0; i < size; i++) {
 		if (element == elements[i]) {
 			return 1;
@@ -265,25 +265,25 @@ static int contains(long size, long *elements, long element)
 	return 0;
 }
 
-int rl_srandmembers(struct rlite *db, const unsigned char *key, long keylen, int repeat, long *memberc, unsigned char ***_members, long **_memberslen)
+int rl_srandmembers(struct rlite *db, const unsigned char *key, int64_t keylen, int repeat, int64_t *memberc, unsigned char ***_members, int64_t **_memberslen)
 {
-	long i;
+	int64_t i;
 	int retval;
-	long *member;
-	long *used_members = NULL;
+	int64_t *member;
+	int64_t *used_members = NULL;
 	rl_btree *set;
 	unsigned char **members = NULL;
-	long *memberslen = NULL;
+	int64_t *memberslen = NULL;
 	RL_CALL(rl_set_get_objects, RL_OK, db, key, keylen, NULL, &set, 0, 0);
 	if (!repeat) {
 		if (*memberc > set->number_of_elements) {
 			*memberc = set->number_of_elements;
 		}
-		RL_MALLOC(used_members, sizeof(long) * *memberc);
+		RL_MALLOC(used_members, sizeof(int64_t) * *memberc);
 	}
 
 	RL_MALLOC(members, sizeof(unsigned char *) * *memberc);
-	RL_MALLOC(memberslen, sizeof(long) * *memberc);
+	RL_MALLOC(memberslen, sizeof(int64_t) * *memberc);
 
 	for (i = 0; i < *memberc; i++) {
 		RL_CALL(rl_btree_random_element, RL_OK, db, set, NULL, (void **)&member);
@@ -309,10 +309,10 @@ cleanup:
 	return retval;
 }
 
-int rl_spop(struct rlite *db, const unsigned char *key, long keylen, unsigned char **member, long *memberlen)
+int rl_spop(struct rlite *db, const unsigned char *key, int64_t keylen, unsigned char **member, int64_t *memberlen)
 {
 	int retval;
-	long set_page_number, *member_page;
+	int64_t set_page_number, *member_page;
 	unsigned char *digest;
 	rl_btree *set;
 	RL_CALL(rl_set_get_objects, RL_OK, db, key, keylen, &set_page_number, &set, 1, 0);
@@ -331,15 +331,15 @@ cleanup:
 	return retval;
 }
 
-int rl_sdiff(struct rlite *db, int keyc, unsigned char **keys, long *keyslen, long *_membersc, unsigned char ***_members, long **_memberslen)
+int rl_sdiff(struct rlite *db, int keyc, unsigned char **keys, int64_t *keyslen, int64_t *_membersc, unsigned char ***_members, int64_t **_memberslen)
 {
 	int retval, found;
 	rl_btree *source = NULL;
 	rl_btree **sets = NULL;
 	rl_btree_iterator *iterator;
 	unsigned char **members = NULL, *digest;
-	long *memberslen = NULL, i, member_page, setsc = 0;
-	long membersc = 0;
+	int64_t *memberslen = NULL, i, member_page, setsc = 0;
+	int64_t membersc = 0;
 	void *tmp;
 
 	if (keyc == 0) {
@@ -349,7 +349,7 @@ int rl_sdiff(struct rlite *db, int keyc, unsigned char **keys, long *keyslen, lo
 
 	RL_CALL(rl_set_get_objects, RL_OK, db, keys[0], keyslen[0], NULL, &source, 0, 0);
 	RL_MALLOC(members, sizeof(unsigned char *) * source->number_of_elements);
-	RL_MALLOC(memberslen, sizeof(long) * source->number_of_elements);
+	RL_MALLOC(memberslen, sizeof(int64_t) * source->number_of_elements);
 	RL_MALLOC(sets, sizeof(rl_btree *) * (keyc - 1));
 	for (i = 1; i < keyc; i++) {
 		retval = rl_set_get_objects(db, keys[i], keyslen[i], NULL, &sets[setsc], 0, 0);
@@ -372,7 +372,7 @@ int rl_sdiff(struct rlite *db, int keyc, unsigned char **keys, long *keyslen, lo
 			}
 		}
 		if (!found) {
-			member_page = *(long *)tmp;
+			member_page = *(int64_t *)tmp;
 			RL_CALL(rl_multi_string_get, RL_OK, db, member_page, &members[membersc], &memberslen[membersc]);
 			membersc++;
 		}
@@ -399,7 +399,7 @@ int rl_sdiff(struct rlite *db, int keyc, unsigned char **keys, long *keyslen, lo
 			retval = RL_OUT_OF_MEMORY;
 			goto cleanup;
 		}
-		*_memberslen = rl_realloc(memberslen, sizeof(long) * membersc);
+		*_memberslen = rl_realloc(memberslen, sizeof(int64_t) * membersc);
 		if (*_memberslen == NULL) {
 			retval = RL_OUT_OF_MEMORY;
 			goto cleanup;
@@ -417,11 +417,11 @@ cleanup:
 	return retval;
 }
 
-int rl_sdiffstore(struct rlite *db, unsigned char *target, long targetlen, int keyc, unsigned char **keys, long *keyslen, long *added)
+int rl_sdiffstore(struct rlite *db, unsigned char *target, int64_t targetlen, int keyc, unsigned char **keys, int64_t *keyslen, int64_t *added)
 {
 	int retval;
 	unsigned char **members = NULL;
-	long *memberslen = NULL, membersc = 0, i;
+	int64_t *memberslen = NULL, membersc = 0, i;
 
 	retval = rl_key_delete_with_value(db, target, targetlen);
 	if (retval != RL_NOT_FOUND && retval != RL_OK) {
@@ -443,14 +443,14 @@ cleanup:
 	return retval;
 }
 
-int rl_sinter(struct rlite *db, int keyc, unsigned char **keys, long *keyslen, long *_membersc, unsigned char ***_members, long **_memberslen)
+int rl_sinter(struct rlite *db, int keyc, unsigned char **keys, int64_t *keyslen, int64_t *_membersc, unsigned char ***_members, int64_t **_memberslen)
 {
 	int retval, found;
 	rl_btree **sets = NULL;
 	rl_btree_iterator *iterator;
 	unsigned char **members = NULL, *digest;
-	long *memberslen = NULL, i, member_page;
-	long membersc = 0, maxmemberc = 0;
+	int64_t *memberslen = NULL, i, member_page;
+	int64_t membersc = 0, maxmemberc = 0;
 	void *tmp;
 
 	if (keyc == 0) {
@@ -479,7 +479,7 @@ int rl_sinter(struct rlite *db, int keyc, unsigned char **keys, long *keyslen, l
 		goto cleanup;
 	}
 	RL_MALLOC(members, sizeof(unsigned char *) * maxmemberc);
-	RL_MALLOC(memberslen, sizeof(long) * maxmemberc);
+	RL_MALLOC(memberslen, sizeof(int64_t) * maxmemberc);
 
 	RL_CALL(rl_btree_iterator_create, RL_OK, db, sets[0], &iterator);
 	while ((retval = rl_btree_iterator_next(iterator, (void **)&digest, &tmp)) == RL_OK) {
@@ -492,7 +492,7 @@ int rl_sinter(struct rlite *db, int keyc, unsigned char **keys, long *keyslen, l
 			}
 		}
 		if (found) {
-			member_page = *(long *)tmp;
+			member_page = *(int64_t *)tmp;
 			RL_CALL(rl_multi_string_get, RL_OK, db, member_page, &members[membersc], &memberslen[membersc]);
 			membersc++;
 		}
@@ -516,7 +516,7 @@ int rl_sinter(struct rlite *db, int keyc, unsigned char **keys, long *keyslen, l
 			retval = RL_OUT_OF_MEMORY;
 			goto cleanup;
 		}
-		*_memberslen = rl_realloc(memberslen, sizeof(long) * membersc);
+		*_memberslen = rl_realloc(memberslen, sizeof(int64_t) * membersc);
 		if (*_memberslen == NULL) {
 			retval = RL_OUT_OF_MEMORY;
 			goto cleanup;
@@ -534,11 +534,11 @@ cleanup:
 	return retval;
 }
 
-int rl_sinterstore(struct rlite *db, unsigned char *target, long targetlen, int keyc, unsigned char **keys, long *keyslen, long *added)
+int rl_sinterstore(struct rlite *db, unsigned char *target, int64_t targetlen, int keyc, unsigned char **keys, int64_t *keyslen, int64_t *added)
 {
 	int retval;
 	unsigned char **members = NULL;
-	long *memberslen = NULL, membersc = 0, i;
+	int64_t *memberslen = NULL, membersc = 0, i;
 
 	retval = rl_key_delete_with_value(db, target, targetlen);
 	if (retval != RL_NOT_FOUND && retval != RL_OK) {
@@ -560,14 +560,14 @@ cleanup:
 	return retval;
 }
 
-int rl_sunion(struct rlite *db, int keyc, unsigned char **keys, long *keyslen, long *_membersc, unsigned char ***_members, long **_memberslen)
+int rl_sunion(struct rlite *db, int keyc, unsigned char **keys, int64_t *keyslen, int64_t *_membersc, unsigned char ***_members, int64_t **_memberslen)
 {
 	int retval, found;
 	rl_btree **sets = NULL;
 	rl_btree_iterator *iterator;
 	unsigned char **members = NULL;
-	long *memberslen = NULL, i, j, member_page;
-	long membersc = 0, maxmemberc = 0;
+	int64_t *memberslen = NULL, i, j, member_page;
+	int64_t membersc = 0, maxmemberc = 0;
 	void *tmp;
 
 	if (keyc == 0) {
@@ -595,7 +595,7 @@ int rl_sunion(struct rlite *db, int keyc, unsigned char **keys, long *keyslen, l
 		goto cleanup;
 	}
 	RL_MALLOC(members, sizeof(unsigned char *) * maxmemberc);
-	RL_MALLOC(memberslen, sizeof(long) * maxmemberc);
+	RL_MALLOC(memberslen, sizeof(int64_t) * maxmemberc);
 
 	for (i = 0; i < keyc; i++) {
 		if (!sets[i]) {
@@ -604,7 +604,7 @@ int rl_sunion(struct rlite *db, int keyc, unsigned char **keys, long *keyslen, l
 		RL_CALL(rl_btree_iterator_create, RL_OK, db, sets[i], &iterator);
 
 		while ((retval = rl_btree_iterator_next(iterator, NULL, &tmp)) == RL_OK) {
-			member_page = *(long *)tmp;
+			member_page = *(int64_t *)tmp;
 			rl_free(tmp);
 			RL_CALL(rl_multi_string_get, RL_OK, db, member_page, &members[membersc], &memberslen[membersc]);
 			found = 0;
@@ -639,7 +639,7 @@ int rl_sunion(struct rlite *db, int keyc, unsigned char **keys, long *keyslen, l
 			retval = RL_OUT_OF_MEMORY;
 			goto cleanup;
 		}
-		*_memberslen = rl_realloc(memberslen, sizeof(long) * membersc);
+		*_memberslen = rl_realloc(memberslen, sizeof(int64_t) * membersc);
 		if (*_memberslen == NULL) {
 			retval = RL_OUT_OF_MEMORY;
 			goto cleanup;
@@ -656,7 +656,7 @@ cleanup:
 	return retval;
 }
 
-int rl_sunionstore(struct rlite *db, unsigned char *target, long targetlen, int keyc, unsigned char **keys, long *keyslen, long *added)
+int rl_sunionstore(struct rlite *db, unsigned char *target, int64_t targetlen, int keyc, unsigned char **keys, int64_t *keyslen, int64_t *added)
 {
 	int retval;
 	rl_btree *target_set = NULL;
@@ -664,11 +664,11 @@ int rl_sunionstore(struct rlite *db, unsigned char *target, long targetlen, int 
 	rl_btree_iterator *iterator;
 	unsigned char *digest = NULL;
 	unsigned char *member;
-	long memberlen, i, member_page;
-	long target_page_number;
+	int64_t memberlen, i, member_page;
+	int64_t target_page_number;
 	void *tmp;
-	long *member_object = NULL;
-	long count = 0;
+	int64_t *member_object = NULL;
+	int64_t count = 0;
 
 	*added = 0;
 	retval = rl_key_delete_with_value(db, target, targetlen);
@@ -693,7 +693,7 @@ int rl_sunionstore(struct rlite *db, unsigned char *target, long targetlen, int 
 
 		RL_CALL(rl_btree_iterator_create, RL_OK, db, set, &iterator);
 		while ((retval = rl_btree_iterator_next(iterator, (void **)&digest, &tmp)) == RL_OK) {
-			member_page = *(long *)tmp;
+			member_page = *(int64_t *)tmp;
 			rl_free(tmp);
 
 			retval = rl_btree_find_score(db, target_set, digest, &tmp, NULL, NULL);
@@ -733,13 +733,13 @@ cleanup:
 	return retval;
 }
 
-int rl_set_pages(struct rlite *db, long page, short *pages)
+int rl_set_pages(struct rlite *db, int64_t page, short *pages)
 {
 	rl_btree *btree;
 	rl_btree_iterator *iterator = NULL;
 	int retval;
 	void *tmp;
-	long member;
+	int64_t member;
 
 	RL_CALL(rl_read, RL_FOUND, db, &rl_data_type_btree_hash_sha1_long, page, &rl_btree_type_hash_sha1_long, &tmp, 1);
 	btree = tmp;
@@ -748,7 +748,7 @@ int rl_set_pages(struct rlite *db, long page, short *pages)
 
 	RL_CALL(rl_btree_iterator_create, RL_OK, db, btree, &iterator);
 	while ((retval = rl_btree_iterator_next(iterator, NULL, &tmp)) == RL_OK) {
-		member = *(long *)tmp;
+		member = *(int64_t *)tmp;
 		pages[member] = 1;
 		RL_CALL(rl_multi_string_pages, RL_OK, db, member, pages);
 		rl_free(tmp);
@@ -768,11 +768,11 @@ cleanup:
 	return retval;
 }
 
-int rl_set_delete(rlite *db, long value_page)
+int rl_set_delete(rlite *db, int64_t value_page)
 {
 	rl_btree *hash;
 	rl_btree_iterator *iterator;
-	long member;
+	int64_t member;
 	int retval;
 	void *tmp;
 	RL_CALL(rl_read, RL_FOUND, db, &rl_data_type_btree_hash_sha1_long, value_page, &rl_btree_type_hash_sha1_long, &tmp, 1);
@@ -781,7 +781,7 @@ int rl_set_delete(rlite *db, long value_page)
 		RL_CALL2(rl_btree_iterator_create, RL_OK, RL_NOT_FOUND, db, hash, &iterator);
 		if (retval == RL_OK) {
 			while ((retval = rl_btree_iterator_next(iterator, NULL, &tmp)) == RL_OK) {
-				member = *(long *)tmp;
+				member = *(int64_t *)tmp;
 				rl_multi_string_delete(db, member);
 				rl_free(tmp);
 			}

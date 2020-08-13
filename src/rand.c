@@ -47,9 +47,9 @@
 #define MASK	((1 << (N - 1)) + (1 << (N - 1)) - 1)
 #define LOW(x)	((unsigned)(x) & MASK)
 #define HIGH(x)	LOW((x) >> N)
-#define MUL(x, y, z)	{ int32_t l = (long)(x) * (long)(y); \
+#define MUL(x, y, z)	{ int32_t l = (int64_t)(x) * (int64_t)(y); \
 		(z)[0] = LOW(l); (z)[1] = HIGH(l); }
-#define CARRY(x, y)	((int32_t)(x) + (long)(y) > MASK)
+#define CARRY(x, y)	((int32_t)(x) + (int64_t)(y) > MASK)
 #define ADDEQU(x, y, z)	(z = CARRY(x, (y)), x = LOW(x + (y)))
 #define X0	0x330E
 #define X1	0xABCD

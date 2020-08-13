@@ -28,7 +28,7 @@ int rl_string_destroy(rlite *UNUSED(db), void *obj)
 	return RL_OK;
 }
 
-int rl_string_create(rlite *db, unsigned char **_data, long *number)
+int rl_string_create(rlite *db, unsigned char **_data, int64_t *number)
 {
 	unsigned char *data = calloc(db->page_size, sizeof(char));
 	if (!data) {
@@ -43,7 +43,7 @@ cleanup:
 	return retval;
 }
 
-int rl_string_get(rlite *db, unsigned char **_data, long number)
+int rl_string_get(rlite *db, unsigned char **_data, int64_t number)
 {
 	void *data;
 	int retval;

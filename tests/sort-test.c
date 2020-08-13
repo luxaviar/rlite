@@ -12,14 +12,14 @@ TEST sort_nosort_list_test(int _commit) {
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
 	unsigned char *key = (unsigned char *)"key";
-	long keylen = 3;
+	int64_t keylen = 3;
 	char *values[] = {"1", "0", "2"};
-	long valueslen[] = {1, 1, 1};
+	int64_t valueslen[] = {1, 1, 1};
 	RL_CALL_VERBOSE(rl_push, RL_OK, db, key, keylen, 1, 0, 3, (unsigned char **)values, valueslen, NULL);
 
-	long objc;
+	int64_t objc;
 	unsigned char **objv;
-	long *objvlen;
+	int64_t *objvlen;
 	RL_CALL_VERBOSE(rl_sort, RL_OK, db, key, keylen, NULL, 0, 1, 0, 0, 0, 0, -1, 0, NULL, NULL, NULL, 0, &objc, &objv, &objvlen);
 
 	EXPECT_LONG(objc, 3);
@@ -43,14 +43,14 @@ TEST sort_list_test(int _commit) {
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
 	unsigned char *key = (unsigned char *)"key";
-	long keylen = 3;
+	int64_t keylen = 3;
 	char *values[] = {"1", "0", "2"};
-	long valueslen[] = {1, 1, 1};
+	int64_t valueslen[] = {1, 1, 1};
 	RL_CALL_VERBOSE(rl_push, RL_OK, db, key, keylen, 1, 0, 3, (unsigned char **)values, valueslen, NULL);
 
-	long objc;
+	int64_t objc;
 	unsigned char **objv;
-	long *objvlen;
+	int64_t *objvlen;
 	RL_CALL_VERBOSE(rl_sort, RL_OK, db, key, keylen, NULL, 0, 0, 0, 0, 0, 0, -1, 0, NULL, NULL, NULL, 0, &objc, &objv, &objvlen);
 
 	EXPECT_LONG(objc, 3);
@@ -74,18 +74,18 @@ TEST sort_list_sortby_test(int _commit) {
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
 	unsigned char *key = (unsigned char *)"key";
-	long keylen = 3;
+	int64_t keylen = 3;
 	char *values[] = {"a", "s", "d"};
-	long valueslen[] = {1, 1, 1};
+	int64_t valueslen[] = {1, 1, 1};
 	RL_CALL_VERBOSE(rl_push, RL_OK, db, key, keylen, 1, 0, 3, (unsigned char **)values, valueslen, NULL);
 
 	RL_CALL_VERBOSE(rl_set, RL_OK, db, (unsigned char *)"wa", 2, (unsigned char *)"1", 1, 1, 0);
 	RL_CALL_VERBOSE(rl_set, RL_OK, db, (unsigned char *)"ws", 2, (unsigned char *)"0", 1, 1, 0);
 	RL_CALL_VERBOSE(rl_set, RL_OK, db, (unsigned char *)"wd", 2, (unsigned char *)"2", 1, 1, 0);
 
-	long objc;
+	int64_t objc;
 	unsigned char **objv;
-	long *objvlen;
+	int64_t *objvlen;
 	RL_CALL_VERBOSE(rl_sort, RL_OK, db, key, keylen, (unsigned char *)"w*", 2, 0, 0, 0, 0, 0, -1, 0, NULL, NULL, NULL, 0, &objc, &objv, &objvlen);
 
 	EXPECT_LONG(objc, 3);
@@ -109,18 +109,18 @@ TEST sort_list_sortby_alpha_test(int _commit) {
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
 	unsigned char *key = (unsigned char *)"key";
-	long keylen = 3;
+	int64_t keylen = 3;
 	char *values[] = {"a", "s", "d"};
-	long valueslen[] = {1, 1, 1};
+	int64_t valueslen[] = {1, 1, 1};
 	RL_CALL_VERBOSE(rl_push, RL_OK, db, key, keylen, 1, 0, 3, (unsigned char **)values, valueslen, NULL);
 
 	RL_CALL_VERBOSE(rl_set, RL_OK, db, (unsigned char *)"wa", 2, (unsigned char *)"1", 1, 1, 0);
 	RL_CALL_VERBOSE(rl_set, RL_OK, db, (unsigned char *)"ws", 2, (unsigned char *)"0", 1, 1, 0);
 	RL_CALL_VERBOSE(rl_set, RL_OK, db, (unsigned char *)"wd", 2, (unsigned char *)"2", 1, 1, 0);
 
-	long objc;
+	int64_t objc;
 	unsigned char **objv;
-	long *objvlen;
+	int64_t *objvlen;
 	RL_CALL_VERBOSE(rl_sort, RL_OK, db, key, keylen, (unsigned char *)"w*", 2, 0, 0, 1, 0, 0, -1, 0, NULL, NULL, NULL, 0, &objc, &objv, &objvlen);
 
 	EXPECT_LONG(objc, 3);
@@ -144,14 +144,14 @@ TEST sort_nosort_set_test(int _commit) {
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
 	unsigned char *key = (unsigned char *)"key";
-	long keylen = 3;
+	int64_t keylen = 3;
 	char *values[] = {"1", "0", "2"};
-	long valueslen[] = {1, 1, 1};
+	int64_t valueslen[] = {1, 1, 1};
 	RL_CALL_VERBOSE(rl_sadd, RL_OK, db, key, keylen, 3, (unsigned char **)values, valueslen, NULL);
 
-	long objc;
+	int64_t objc;
 	unsigned char **objv;
-	long *objvlen;
+	int64_t *objvlen;
 	RL_CALL_VERBOSE(rl_sort, RL_OK, db, key, keylen, NULL, 0, 1, 0, 0, 0, 0, -1, 0, NULL, NULL, NULL, 0, &objc, &objv, &objvlen);
 
 	EXPECT_LONG(objc, 3);
@@ -175,14 +175,14 @@ TEST sort_set_test(int _commit) {
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
 	unsigned char *key = (unsigned char *)"key";
-	long keylen = 3;
+	int64_t keylen = 3;
 	char *values[] = {"1", "0", "2"};
-	long valueslen[] = {1, 1, 1};
+	int64_t valueslen[] = {1, 1, 1};
 	RL_CALL_VERBOSE(rl_sadd, RL_OK, db, key, keylen, 3, (unsigned char **)values, valueslen, NULL);
 
-	long objc;
+	int64_t objc;
 	unsigned char **objv;
-	long *objvlen;
+	int64_t *objvlen;
 	RL_CALL_VERBOSE(rl_sort, RL_OK, db, key, keylen, NULL, 0, 0, 0, 0, 0, 0, -1, 0, NULL, NULL, NULL, 0, &objc, &objv, &objvlen);
 
 	EXPECT_LONG(objc, 3);
@@ -206,18 +206,18 @@ TEST sort_set_sortby_test(int _commit) {
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
 	unsigned char *key = (unsigned char *)"key";
-	long keylen = 3;
+	int64_t keylen = 3;
 	char *values[] = {"a", "s", "d"};
-	long valueslen[] = {1, 1, 1};
+	int64_t valueslen[] = {1, 1, 1};
 	RL_CALL_VERBOSE(rl_sadd, RL_OK, db, key, keylen, 3, (unsigned char **)values, valueslen, NULL);
 
 	RL_CALL_VERBOSE(rl_set, RL_OK, db, (unsigned char *)"wa", 2, (unsigned char *)"1", 1, 1, 0);
 	RL_CALL_VERBOSE(rl_set, RL_OK, db, (unsigned char *)"ws", 2, (unsigned char *)"0", 1, 1, 0);
 	RL_CALL_VERBOSE(rl_set, RL_OK, db, (unsigned char *)"wd", 2, (unsigned char *)"2", 1, 1, 0);
 
-	long objc;
+	int64_t objc;
 	unsigned char **objv;
-	long *objvlen;
+	int64_t *objvlen;
 	RL_CALL_VERBOSE(rl_sort, RL_OK, db, key, keylen, (unsigned char *)"w*", 2, 0, 0, 0, 0, 0, -1, 0, NULL, NULL, NULL, 0, &objc, &objv, &objvlen);
 
 	EXPECT_LONG(objc, 3);
@@ -241,18 +241,18 @@ TEST sort_set_sortby_alpha_test(int _commit) {
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
 	unsigned char *key = (unsigned char *)"key";
-	long keylen = 3;
+	int64_t keylen = 3;
 	char *values[] = {"a", "s", "d"};
-	long valueslen[] = {1, 1, 1};
+	int64_t valueslen[] = {1, 1, 1};
 	RL_CALL_VERBOSE(rl_sadd, RL_OK, db, key, keylen, 3, (unsigned char **)values, valueslen, NULL);
 
 	RL_CALL_VERBOSE(rl_set, RL_OK, db, (unsigned char *)"wa", 2, (unsigned char *)"1", 1, 1, 0);
 	RL_CALL_VERBOSE(rl_set, RL_OK, db, (unsigned char *)"ws", 2, (unsigned char *)"0", 1, 1, 0);
 	RL_CALL_VERBOSE(rl_set, RL_OK, db, (unsigned char *)"wd", 2, (unsigned char *)"2", 1, 1, 0);
 
-	long objc;
+	int64_t objc;
 	unsigned char **objv;
-	long *objvlen;
+	int64_t *objvlen;
 	RL_CALL_VERBOSE(rl_sort, RL_OK, db, key, keylen, (unsigned char *)"w*", 2, 0, 0, 1, 0, 0, -1, 0, NULL, NULL, NULL, 0, &objc, &objv, &objvlen);
 
 	EXPECT_LONG(objc, 3);
@@ -276,16 +276,16 @@ TEST sort_nosort_zset_test(int _commit) {
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
 	unsigned char *key = (unsigned char *)"key";
-	long keylen = 3;
+	int64_t keylen = 3;
 	char *values[] = {"1", "0", "2"};
-	long valueslen[] = {1, 1, 1};
+	int64_t valueslen[] = {1, 1, 1};
 	RL_CALL_VERBOSE(rl_zadd, RL_OK, db, key, keylen, 0.0, (unsigned char *)values[0], valueslen[0]);
 	RL_CALL_VERBOSE(rl_zadd, RL_OK, db, key, keylen, 0.0, (unsigned char *)values[1], valueslen[1]);
 	RL_CALL_VERBOSE(rl_zadd, RL_OK, db, key, keylen, 0.0, (unsigned char *)values[2], valueslen[2]);
 
-	long objc;
+	int64_t objc;
 	unsigned char **objv;
-	long *objvlen;
+	int64_t *objvlen;
 	RL_CALL_VERBOSE(rl_sort, RL_OK, db, key, keylen, NULL, 0, 1, 0, 0, 0, 0, -1, 0, NULL, NULL, NULL, 0, &objc, &objv, &objvlen);
 
 	EXPECT_LONG(objc, 3);
@@ -309,16 +309,16 @@ TEST sort_zset_test(int _commit) {
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
 	unsigned char *key = (unsigned char *)"key";
-	long keylen = 3;
+	int64_t keylen = 3;
 	char *values[] = {"1", "0", "2"};
-	long valueslen[] = {1, 1, 1};
+	int64_t valueslen[] = {1, 1, 1};
 	RL_CALL_VERBOSE(rl_zadd, RL_OK, db, key, keylen, 0.0, (unsigned char *)values[0], valueslen[0]);
 	RL_CALL_VERBOSE(rl_zadd, RL_OK, db, key, keylen, 0.0, (unsigned char *)values[1], valueslen[1]);
 	RL_CALL_VERBOSE(rl_zadd, RL_OK, db, key, keylen, 0.0, (unsigned char *)values[2], valueslen[2]);
 
-	long objc;
+	int64_t objc;
 	unsigned char **objv;
-	long *objvlen;
+	int64_t *objvlen;
 	RL_CALL_VERBOSE(rl_sort, RL_OK, db, key, keylen, NULL, 0, 0, 0, 0, 0, 0, -1, 0, NULL, NULL, NULL, 0, &objc, &objv, &objvlen);
 
 	EXPECT_LONG(objc, 3);
@@ -342,9 +342,9 @@ TEST sort_zset_sortby_test(int _commit) {
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
 	unsigned char *key = (unsigned char *)"key";
-	long keylen = 3;
+	int64_t keylen = 3;
 	char *values[] = {"a", "s", "d"};
-	long valueslen[] = {1, 1, 1};
+	int64_t valueslen[] = {1, 1, 1};
 	RL_CALL_VERBOSE(rl_zadd, RL_OK, db, key, keylen, 0.0, (unsigned char *)values[0], valueslen[0]);
 	RL_CALL_VERBOSE(rl_zadd, RL_OK, db, key, keylen, 0.0, (unsigned char *)values[1], valueslen[1]);
 	RL_CALL_VERBOSE(rl_zadd, RL_OK, db, key, keylen, 0.0, (unsigned char *)values[2], valueslen[2]);
@@ -353,9 +353,9 @@ TEST sort_zset_sortby_test(int _commit) {
 	RL_CALL_VERBOSE(rl_set, RL_OK, db, (unsigned char *)"ws", 2, (unsigned char *)"0", 1, 1, 0);
 	RL_CALL_VERBOSE(rl_set, RL_OK, db, (unsigned char *)"wd", 2, (unsigned char *)"2", 1, 1, 0);
 
-	long objc;
+	int64_t objc;
 	unsigned char **objv;
-	long *objvlen;
+	int64_t *objvlen;
 	RL_CALL_VERBOSE(rl_sort, RL_OK, db, key, keylen, (unsigned char *)"w*", 2, 0, 0, 0, 0, 0, -1, 0, NULL, NULL, NULL, 0, &objc, &objv, &objvlen);
 
 	EXPECT_LONG(objc, 3);
@@ -379,9 +379,9 @@ TEST sort_zset_sortby_alpha_test(int _commit) {
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
 	unsigned char *key = (unsigned char *)"key";
-	long keylen = 3;
+	int64_t keylen = 3;
 	char *values[] = {"a", "s", "d"};
-	long valueslen[] = {1, 1, 1};
+	int64_t valueslen[] = {1, 1, 1};
 	RL_CALL_VERBOSE(rl_zadd, RL_OK, db, key, keylen, 0.0, (unsigned char *)values[0], valueslen[0]);
 	RL_CALL_VERBOSE(rl_zadd, RL_OK, db, key, keylen, 0.0, (unsigned char *)values[1], valueslen[1]);
 	RL_CALL_VERBOSE(rl_zadd, RL_OK, db, key, keylen, 0.0, (unsigned char *)values[2], valueslen[2]);
@@ -390,9 +390,9 @@ TEST sort_zset_sortby_alpha_test(int _commit) {
 	RL_CALL_VERBOSE(rl_set, RL_OK, db, (unsigned char *)"ws", 2, (unsigned char *)"0", 1, 1, 0);
 	RL_CALL_VERBOSE(rl_set, RL_OK, db, (unsigned char *)"wd", 2, (unsigned char *)"2", 1, 1, 0);
 
-	long objc;
+	int64_t objc;
 	unsigned char **objv;
-	long *objvlen;
+	int64_t *objvlen;
 	RL_CALL_VERBOSE(rl_sort, RL_OK, db, key, keylen, (unsigned char *)"w*", 2, 0, 0, 1, 0, 0, -1, 0, NULL, NULL, NULL, 0, &objc, &objv, &objvlen);
 
 	EXPECT_LONG(objc, 3);
@@ -416,14 +416,14 @@ TEST sort_set_nosort_lua(int _commit) {
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
 	unsigned char *key = (unsigned char *)"key";
-	long keylen = 3;
+	int64_t keylen = 3;
 	char *values[] = {"1", "0", "2"};
-	long valueslen[] = {1, 1, 1};
+	int64_t valueslen[] = {1, 1, 1};
 	RL_CALL_VERBOSE(rl_sadd, RL_OK, db, key, keylen, 3, (unsigned char **)values, valueslen, NULL);
 
-	long objc;
+	int64_t objc;
 	unsigned char **objv;
-	long *objvlen;
+	int64_t *objvlen;
 	RL_CALL_VERBOSE(rl_sort, RL_OK, db, key, keylen, NULL, 0, 1, 1, 0, 0, 0, -1, 0, NULL, NULL, NULL, 0, &objc, &objv, &objvlen);
 
 	EXPECT_LONG(objc, 3);

@@ -2,6 +2,8 @@
 #define _RLITE_H
 
 #include <stdio.h>
+#include <stdint.h>
+#include <inttypes.h>
 #include "status.h"
 #include "page_btree.h"
 #include "page_key.h"
@@ -86,11 +88,11 @@ typedef struct {
 
 typedef struct {
 	char *data;
-	long datalen;
+	int64_t datalen;
 } rl_memory_driver;
 
 typedef struct {
-	long page_number;
+	int64_t page_number;
 	rl_data_type *type;
 	void *obj;
 #ifdef RL_DEBUG
@@ -102,25 +104,25 @@ typedef struct rlite {
 	// these four properties can change during a transaction
 	// we need to record their original values to use when
 	// checking watched keys
-	long initial_next_empty_page;
-	long initial_number_of_pages;
+	int64_t initial_next_empty_page;
+	int64_t initial_number_of_pages;
 	int initial_number_of_databases;
-	long *initial_databases;
+	int64_t *initial_databases;
 
-	long number_of_pages;
-	long next_empty_page;
-	long page_size;
+	int64_t number_of_pages;
+	int64_t next_empty_page;
+	int64_t page_size;
 	void *driver;
 	int driver_type;
 	int selected_internal;
 	int selected_database;
 	int number_of_databases;
-	long *databases;
-	long read_pages_alloc;
-	long read_pages_len;
+	int64_t *databases;
+	int64_t read_pages_alloc;
+	int64_t read_pages_len;
 	rl_page **read_pages;
-	long write_pages_alloc;
-	long write_pages_len;
+	int64_t write_pages_alloc;
+	int64_t write_pages_len;
 	rl_page **write_pages;
 
 	char *subscriber_id;
@@ -130,7 +132,7 @@ typedef struct rlite {
 
 typedef struct watched_key {
 	unsigned char digest[20];
-	long version;
+	int64_t version;
 	int database;
 } watched_key;
 
@@ -141,12 +143,12 @@ int rl_close(rlite *db);
 int rl_ensure_pages(rlite *db);
 int rl_read_header(rlite *db);
 int rl_header_deserialize(struct rlite *db, void **obj, void *context, unsigned char *data);
-int rl_read(struct rlite *db, rl_data_type *type, long page, void *context, void **obj, int cache);
+int rl_read(struct rlite *db, rl_data_type *type, int64_t page, void *context, void **obj, int cache);
 int rl_get_key_btree(rlite *db, struct rl_btree **btree, int create);
-int rl_alloc_page_number(rlite *db, long *page_number);
-int rl_write(struct rlite *db, rl_data_type *type, long page, void *obj);
-int rl_purge_cache(struct rlite *db, long page);
-int rl_delete(struct rlite *db, long page);
+int rl_alloc_page_number(rlite *db, int64_t *page_number);
+int rl_write(struct rlite *db, rl_data_type *type, int64_t page, void *obj);
+int rl_purge_cache(struct rlite *db, int64_t page);
+int rl_delete(struct rlite *db, int64_t page);
 int rl_dirty_hash(struct rlite *db, unsigned char **hash);
 int rl_commit(struct rlite *db);
 int rl_discard(struct rlite *db);
@@ -154,11 +156,11 @@ int rl_is_balanced(struct rlite *db);
 int rl_get_selected_db(struct rlite *db);
 int rl_select(struct rlite *db, int selected_database);
 int rl_select_internal(struct rlite *db, int internal);
-int rl_move(struct rlite *db, unsigned char *key, long keylen, int database);
-int rl_rename(struct rlite *db, const unsigned char *src, long srclen, const unsigned char *target, long targetlen, int overwrite);
-int rl_dbsize(struct rlite *db, long *size);
-int rl_keys(struct rlite *db, unsigned char *pattern, long patternlen, long *size, unsigned char ***result, long **resultlen);
-int rl_randomkey(struct rlite *db, unsigned char **key, long *keylen);
+int rl_move(struct rlite *db, unsigned char *key, int64_t keylen, int database);
+int rl_rename(struct rlite *db, const unsigned char *src, int64_t srclen, const unsigned char *target, int64_t targetlen, int overwrite);
+int rl_dbsize(struct rlite *db, int64_t *size);
+int rl_keys(struct rlite *db, unsigned char *pattern, int64_t patternlen, int64_t *size, unsigned char ***result, int64_t **resultlen);
+int rl_randomkey(struct rlite *db, unsigned char **key, int64_t *keylen);
 int rl_flushall(struct rlite *db);
 int rl_flushdb(struct rlite *db);
 

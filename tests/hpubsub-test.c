@@ -1,5 +1,5 @@
 #include <string.h>
-#include <unistd.h>
+#include "rlite/port/unistd.h"
 #include "rlite/hirlite.h"
 #include "util.h"
 

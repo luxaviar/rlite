@@ -6,10 +6,10 @@
 #include "../src/rlite/rlite.h"
 #include "../src/rlite/type_zset.h"
 
-static int expect_key(rlite *db, unsigned char *key, long keylen, char type, long page)
+static int expect_key(rlite *db, unsigned char *key, int64_t keylen, char type, int64_t page)
 {
 	unsigned char type2;
-	long page2;
+	int64_t page2;
 	int retval;
 	RL_CALL(rl_key_get, RL_FOUND, db, key, keylen, &type2, NULL, &page2, NULL, NULL);
 	EXPECT_INT(type, type2);
@@ -25,9 +25,9 @@ TEST basic_test_set_get(int _commit)
 	rlite *db;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = (unsigned char *)"my key";
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char type = 'A';
-	long page = 23;
+	int64_t page = 23;
 	RL_CALL_VERBOSE(rl_key_set, RL_OK, db, key, keylen, type, page, 0, 0);
 	RL_COMMIT();
 	RL_CALL_VERBOSE(expect_key, RL_OK, db, key, keylen, type, page);
@@ -43,7 +43,7 @@ TEST basic_test_get_unexisting()
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, 0, 1);
 
 	unsigned char *key = (unsigned char *)"my key";
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	RL_CALL_VERBOSE(rl_key_get, RL_NOT_FOUND, db, key, keylen, NULL, NULL, NULL, NULL, NULL);
 	rl_close(db);
 	PASS();
@@ -57,9 +57,9 @@ TEST basic_test_set_delete()
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, 0, 1);
 
 	unsigned char *key = (unsigned char *)"my key";
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char type = 'A';
-	long page = 23;
+	int64_t page = 23;
 	RL_CALL_VERBOSE(rl_key_set, RL_OK, db, key, keylen, type, page, 0, 0);
 	RL_CALL_VERBOSE(rl_key_delete, RL_OK, db, key, keylen);
 	RL_CALL_VERBOSE(rl_key_get, RL_NOT_FOUND, db, key, keylen, NULL, NULL, NULL, NULL, NULL);
@@ -75,10 +75,10 @@ TEST basic_test_get_or_create(int _commit)
 	rlite *db;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = (unsigned char *)"my key";
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char type = 'A';
-	long page = 100, page2 = 200; // set dummy values for != assert
-	long version;
+	int64_t page = 100, page2 = 200; // set dummy values for != assert
+	int64_t version;
 	RL_CALL_VERBOSE(rl_key_get_or_create, RL_NOT_FOUND, db, key, keylen, type, &page, &version);
 	RL_COMMIT();
 
@@ -98,9 +98,9 @@ TEST basic_test_multidb(int _commit)
 	rlite *db;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = (unsigned char *)"my key";
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char type = 'A';
-	long page = 100, page2 = 200, pagetest; // set dummy values for != assert
+	int64_t page = 100, page2 = 200, pagetest; // set dummy values for != assert
 
 	RL_CALL_VERBOSE(rl_key_get_or_create, RL_NOT_FOUND, db, key, keylen, type, &page, NULL);
 	RL_COMMIT();
@@ -127,9 +127,9 @@ TEST basic_test_move(int _commit)
 	rlite *db;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = (unsigned char *)"my key";
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char type = 'A';
-	long page = 100, pagetest; // set dummy values for != assert
+	int64_t page = 100, pagetest; // set dummy values for != assert
 
 	RL_CALL_VERBOSE(rl_key_get_or_create, RL_NOT_FOUND, db, key, keylen, type, &page, NULL);
 	RL_COMMIT();
@@ -150,9 +150,9 @@ TEST existing_test_move(int _commit)
 	rlite *db;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = (unsigned char *)"my key";
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char type = 'A';
-	long page = 100, page2 = 101, pagetest; // set dummy values for != assert
+	int64_t page = 100, page2 = 101, pagetest; // set dummy values for != assert
 
 	RL_CALL_VERBOSE(rl_select, RL_OK, db, 1);
 	RL_CALL_VERBOSE(rl_key_get_or_create, RL_NOT_FOUND, db, key, keylen, type, &page, NULL);
@@ -180,9 +180,9 @@ TEST basic_test_expires(int _commit)
 	rlite *db;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = (unsigned char *)"my key";
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char type = 'A';
-	long page = 100;
+	int64_t page = 100;
 
 	RL_CALL_VERBOSE(rl_key_set, RL_OK, db, key, keylen, type, page, rl_mstime() - 1, 0);
 	RL_COMMIT();
@@ -204,10 +204,10 @@ TEST basic_test_change_expiration(int _commit)
 	rlite *db;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = (unsigned char *)"my key";
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char type = 'A';
-	long page = 100;
-	unsigned long long expiration = rl_mstime() + 1000, expirationtest;
+	int64_t page = 100;
+	uint64_t expiration = rl_mstime() + 1000, expirationtest;
 
 	RL_CALL_VERBOSE(rl_key_set, RL_OK, db, key, keylen, type, page, expiration, 0);
 	RL_COMMIT();
@@ -234,7 +234,7 @@ TEST test_delete_with_value(int _commit)
 	rlite *db;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = (unsigned char *)"my key";
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 
 	RL_CALL_VERBOSE(rl_zadd, RL_OK, db, key, keylen, 100, (unsigned char *)"asd", 3);
 	RL_COMMIT();
@@ -252,9 +252,9 @@ TEST test_rename_ok(int _commit)
 	rlite *db;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = (unsigned char *)"my key";
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *key2 = (unsigned char *)"my key 2";
-	long key2len = strlen((char *)key2);
+	int64_t key2len = strlen((char *)key2);
 
 	RL_CALL_VERBOSE(rl_zadd, RL_OK, db, key, keylen, 100, (unsigned char *)"asd", 3);
 	RL_COMMIT();
@@ -272,11 +272,11 @@ TEST test_rename_overwrite(int _commit)
 	rlite *db;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = (unsigned char *)"my key";
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *key2 = (unsigned char *)"my key 2";
-	long key2len = strlen((char *)key2);
+	int64_t key2len = strlen((char *)key2);
 	unsigned char *data = (unsigned char *)"asd";
-	long datalen = strlen((char *)data);
+	int64_t datalen = strlen((char *)data);
 	double score = 100, score2 = 200, scoretest;
 
 	RL_CALL_VERBOSE(rl_zadd, RL_OK, db, key, keylen, score, data, datalen);
@@ -301,11 +301,11 @@ TEST test_rename_no_overwrite(int _commit)
 	rlite *db;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = (unsigned char *)"my key";
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *key2 = (unsigned char *)"my key 2";
-	long key2len = strlen((char *)key2);
+	int64_t key2len = strlen((char *)key2);
 	unsigned char *data = (unsigned char *)"asd";
-	long datalen = strlen((char *)data);
+	int64_t datalen = strlen((char *)data);
 	double score = 100, score2 = 200, scoretest;
 
 	RL_CALL_VERBOSE(rl_zadd, RL_OK, db, key, keylen, score, data, datalen);
@@ -331,13 +331,13 @@ TEST test_dbsize(int _commit)
 	rlite *db;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = (unsigned char *)"my key";
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *key2 = (unsigned char *)"my key 2";
-	long key2len = strlen((char *)key2);
+	int64_t key2len = strlen((char *)key2);
 	unsigned char *data = (unsigned char *)"asd";
-	long datalen = strlen((char *)data);
+	int64_t datalen = strlen((char *)data);
 	double score = 100, score2 = 200;
-	long size;
+	int64_t size;
 
 	RL_CALL_VERBOSE(rl_zadd, RL_OK, db, key, keylen, score, data, datalen);
 	RL_COMMIT();
@@ -376,15 +376,15 @@ TEST test_keys(int _commit)
 
 	rlite *db;
 	unsigned char *key = (unsigned char *)"my key";
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *key2 = (unsigned char *)"my key 2";
-	long key2len = strlen((char *)key2);
+	int64_t key2len = strlen((char *)key2);
 	unsigned char *data = (unsigned char *)"asd";
-	long datalen = strlen((char *)data);
+	int64_t datalen = strlen((char *)data);
 	double score = 100, score2 = 200;
-	long len = 0, *keyslen = NULL;
+	int64_t len = 0, *keyslen = NULL;
 	unsigned char **keys = NULL;
-	long i;
+	int64_t i;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
 #define FREE_KEYS()\
@@ -458,13 +458,13 @@ TEST test_randomkey(int _commit)
 
 	rlite *db;
 	unsigned char *key = (unsigned char *)"my key";
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *key2 = (unsigned char *)"my key 2";
-	long key2len = strlen((char *)key2);
+	int64_t key2len = strlen((char *)key2);
 	unsigned char *data = (unsigned char *)"asd";
-	long datalen = strlen((char *)data);
+	int64_t datalen = strlen((char *)data);
 	unsigned char *testkey;
-	long testkeylen, i;
+	int64_t testkeylen, i;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
 	RL_CALL_VERBOSE(rl_set, RL_OK, db, key, keylen, data, datalen, 0, 0);
@@ -496,12 +496,12 @@ TEST test_flushdb(int _commit)
 
 	rlite *db;
 	unsigned char *key = (unsigned char *)"my key";
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *key2 = (unsigned char *)"my key 2";
-	long key2len = strlen((char *)key2);
+	int64_t key2len = strlen((char *)key2);
 	unsigned char *data = (unsigned char *)"asd";
-	long datalen = strlen((char *)data);
-	long len;
+	int64_t datalen = strlen((char *)data);
+	int64_t len;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
 	RL_CALL_VERBOSE(rl_set, RL_OK, db, key, keylen, data, datalen, 0, 0);
@@ -525,11 +525,11 @@ TEST string_version_test(int _commit)
 	rlite *db;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = (unsigned char *)"my key";
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *data = (unsigned char *)"asd";
-	long datalen = strlen((char *)data);
+	int64_t datalen = strlen((char *)data);
 	unsigned char type = 'A';
-	long page = 23, version = -1, version2 = -2, version3 = -3;
+	int64_t page = 23, version = -1, version2 = -2, version3 = -3;
 	RL_CALL_VERBOSE(rl_set, RL_OK, db, key, keylen, data, datalen, 0, 0);
 	RL_CALL_VERBOSE(rl_key_get, RL_FOUND, db, key, keylen, &type, NULL, &page, NULL, &version);
 	RL_CALL_VERBOSE(rl_set, RL_OK, db, key, keylen, data, datalen, 0, 0);
@@ -550,11 +550,11 @@ TEST list_version_test(int _commit)
 	rlite *db;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = (unsigned char *)"my key";
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *data = (unsigned char *)"asd";
-	long datalen = strlen((char *)data);
+	int64_t datalen = strlen((char *)data);
 	unsigned char type = 'A';
-	long page = 23, version = -1, version2 = -2, version3 = -3;
+	int64_t page = 23, version = -1, version2 = -2, version3 = -3;
 	RL_CALL_VERBOSE(rl_push, RL_OK, db, key, keylen, 1, 1, 1, &data, &datalen, NULL);
 	RL_CALL_VERBOSE(rl_key_get, RL_FOUND, db, key, keylen, &type, NULL, &page, NULL, &version);
 	RL_CALL_VERBOSE(rl_push, RL_OK, db, key, keylen, 1, 1, 1, &data, &datalen, NULL);
@@ -575,13 +575,13 @@ TEST set_version_test(int _commit)
 	rlite *db;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = (unsigned char *)"my key";
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *data = (unsigned char *)"asd";
-	long datalen = strlen((char *)data);
+	int64_t datalen = strlen((char *)data);
 	unsigned char *data2 = (unsigned char *)"asd2";
-	long data2len = strlen((char *)data2);
+	int64_t data2len = strlen((char *)data2);
 	unsigned char type = 'A';
-	long page = 23, version = -1, version2 = -2, version3 = -3;
+	int64_t page = 23, version = -1, version2 = -2, version3 = -3;
 	RL_CALL_VERBOSE(rl_sadd, RL_OK, db, key, keylen, 1, &data, &datalen, NULL);
 	RL_CALL_VERBOSE(rl_key_get, RL_FOUND, db, key, keylen, &type, NULL, &page, NULL, &version);
 	RL_CALL_VERBOSE(rl_sadd, RL_OK, db, key, keylen, 1, &data2, &data2len, NULL);
@@ -603,13 +603,13 @@ TEST zset_version_test(int _commit)
 	rlite *db;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = (unsigned char *)"my key";
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *data = (unsigned char *)"asd";
-	long datalen = strlen((char *)data);
+	int64_t datalen = strlen((char *)data);
 	unsigned char *data2 = (unsigned char *)"asd2";
-	long data2len = strlen((char *)data2);
+	int64_t data2len = strlen((char *)data2);
 	unsigned char type = 'A';
-	long page = 23, version = -1, version2 = -2, version3 = -3;
+	int64_t page = 23, version = -1, version2 = -2, version3 = -3;
 	RL_CALL_VERBOSE(rl_zadd, RL_OK, db, key, keylen, 0.0, data, datalen);
 	RL_CALL_VERBOSE(rl_key_get, RL_FOUND, db, key, keylen, &type, NULL, &page, NULL, &version);
 	RL_CALL_VERBOSE(rl_zadd, RL_OK, db, key, keylen, 0.0, data2, data2len);
@@ -631,15 +631,15 @@ TEST hash_version_test(int _commit)
 	rlite *db;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = (unsigned char *)"my key";
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *field = (unsigned char *)"field";
-	long fieldlen = strlen((char *)field);
+	int64_t fieldlen = strlen((char *)field);
 	unsigned char *data = (unsigned char *)"asd";
-	long datalen = strlen((char *)data);
+	int64_t datalen = strlen((char *)data);
 	unsigned char *data2 = (unsigned char *)"asd2";
-	long data2len = strlen((char *)data2);
+	int64_t data2len = strlen((char *)data2);
 	unsigned char type = 'A';
-	long page = 23, version = -1, version2 = -2, version3 = -3;
+	int64_t page = 23, version = -1, version2 = -2, version3 = -3;
 	RL_CALL_VERBOSE(rl_hset, RL_OK, db, key, keylen, field, fieldlen, data, datalen, NULL, 1);
 	RL_CALL_VERBOSE(rl_key_get, RL_FOUND, db, key, keylen, &type, NULL, &page, NULL, &version);
 	RL_CALL_VERBOSE(rl_hset, RL_OK, db, key, keylen, field, fieldlen, data2, data2len, NULL, 1);
@@ -662,9 +662,9 @@ TEST watch_test(int _commit)
 	rlite *db;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = (unsigned char *)"my key";
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *data = (unsigned char *)"asd";
-	long datalen = strlen((char *)data);
+	int64_t datalen = strlen((char *)data);
 
 	struct watched_key *wkey;
 
@@ -683,7 +683,7 @@ TEST watch_test(int _commit)
 
 SUITE(key_test)
 {
-	long i;
+	int64_t i;
 	for (i = 0; i < 3; i++) {
 		RUN_TESTp(basic_test_set_get, i);
 		RUN_TESTp(basic_test_get_or_create, i);

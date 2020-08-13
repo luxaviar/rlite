@@ -8,9 +8,9 @@
 #include "rlite/util.h"
 #include "rlite/hyperloglog.h"
 
-static int rl_string_get_objects(rlite *db, const unsigned char *key, long keylen, long *_page_number, unsigned long long *expires, long *version)
+static int rl_string_get_objects(rlite *db, const unsigned char *key, int64_t keylen, int64_t *_page_number, uint64_t *expires, int64_t *version)
 {
-	long page_number;
+	int64_t page_number;
 	int retval;
 	unsigned char type;
 	retval = rl_key_get(db, key, keylen, &type, NULL, &page_number, expires, version);
@@ -29,12 +29,12 @@ cleanup:
 	return retval;
 }
 
-int rl_set(struct rlite *db, const unsigned char *key, long keylen, unsigned char *value, long valuelen, int nx, unsigned long long expires)
+int rl_set(struct rlite *db, const unsigned char *key, int64_t keylen, unsigned char *value, int64_t valuelen, int nx, uint64_t expires)
 {
 	int retval;
-	long page_number;
+	int64_t page_number;
 	unsigned char type;
-	long value_page, version;
+	int64_t value_page, version;
 	retval = rl_key_get(db, key, keylen, &type, NULL, &value_page, NULL, &version);
 	if (retval == RL_FOUND) {
 		if (nx) {
@@ -53,9 +53,9 @@ cleanup:
 	return retval;
 }
 
-int rl_get(struct rlite *db, const unsigned char *key, long keylen, unsigned char **value, long *valuelen)
+int rl_get(struct rlite *db, const unsigned char *key, int64_t keylen, unsigned char **value, int64_t *valuelen)
 {
-	long page_number;
+	int64_t page_number;
 	int retval;
 	RL_CALL(rl_string_get_objects, RL_OK, db, key, keylen, &page_number, NULL, NULL);
 	if (valuelen) {
@@ -66,9 +66,9 @@ cleanup:
 	return retval;
 }
 
-int rl_get_cpy(struct rlite *db, const unsigned char *key, long keylen, unsigned char *value, long *valuelen)
+int rl_get_cpy(struct rlite *db, const unsigned char *key, int64_t keylen, unsigned char *value, int64_t *valuelen)
 {
-	long page_number;
+	int64_t page_number;
 	int retval;
 	RL_CALL(rl_string_get_objects, RL_OK, db, key, keylen, &page_number, NULL, NULL);
 	if (value || valuelen) {
@@ -79,11 +79,11 @@ cleanup:
 	return retval;
 }
 
-int rl_append(struct rlite *db, const unsigned char *key, long keylen, unsigned char *value, long valuelen, long *newlength)
+int rl_append(struct rlite *db, const unsigned char *key, int64_t keylen, unsigned char *value, int64_t valuelen, int64_t *newlength)
 {
 	int retval;
-	long page_number;
-	long version;
+	int64_t page_number;
+	int64_t version;
 	RL_CALL2(rl_string_get_objects, RL_OK, RL_NOT_FOUND, db, key, keylen, &page_number, NULL, &version);
 	if (retval == RL_NOT_FOUND) {
 		RL_CALL(rl_multi_string_set, RL_OK, db, &page_number, value, valuelen);
@@ -102,9 +102,9 @@ cleanup:
 	return retval;
 }
 
-int rl_getrange(struct rlite *db, const unsigned char *key, long keylen, long start, long stop, unsigned char **value, long *valuelen)
+int rl_getrange(struct rlite *db, const unsigned char *key, int64_t keylen, int64_t start, int64_t stop, unsigned char **value, int64_t *valuelen)
 {
-	long page_number;
+	int64_t page_number;
 	int retval;
 	RL_CALL(rl_string_get_objects, RL_OK, db, key, keylen, &page_number, NULL, NULL);
 	RL_CALL(rl_multi_string_getrange, RL_OK, db, page_number, value, valuelen, start, stop);
@@ -113,11 +113,11 @@ cleanup:
 	return retval;
 }
 
-int rl_setrange(struct rlite *db, const unsigned char *key, long keylen, long index, unsigned char *value, long valuelen, long *newlength)
+int rl_setrange(struct rlite *db, const unsigned char *key, int64_t keylen, int64_t index, unsigned char *value, int64_t valuelen, int64_t *newlength)
 {
-	long page_number;
-	long version;
-	unsigned long long expires;
+	int64_t page_number;
+	int64_t version;
+	uint64_t expires;
 	int retval;
 	if (valuelen + index > 512*1024*1024) {
 		retval = RL_INVALID_PARAMETERS;
@@ -141,19 +141,19 @@ cleanup:
 	return retval;
 }
 
-int rl_incr(struct rlite *db, const unsigned char *key, long keylen, long long increment, long long *newvalue)
+int rl_incr(struct rlite *db, const unsigned char *key, int64_t keylen, int64_t increment, int64_t *newvalue)
 {
-	long page_number;
+	int64_t page_number;
 	int retval;
 	unsigned char *value = NULL;
 	char *end;
-	long valuelen;
-	long long lvalue;
-	unsigned long long expires;
+	int64_t valuelen;
+	int64_t lvalue;
+	uint64_t expires;
 	RL_CALL2(rl_string_get_objects, RL_OK, RL_NOT_FOUND, db, key, keylen, &page_number, &expires, NULL);
 	if (retval == RL_NOT_FOUND) {
 		RL_MALLOC(value, sizeof(unsigned char) * MAX_LLONG_DIGITS);
-		valuelen = snprintf((char *)value, MAX_LLONG_DIGITS, "%lld", increment);
+		valuelen = snprintf((char *)value, MAX_LLONG_DIGITS, "%" PRId64 "", increment);
 		if (newvalue) {
 			*newvalue = increment;
 		}
@@ -182,7 +182,7 @@ int rl_incr(struct rlite *db, const unsigned char *key, long keylen, long long i
 		*newvalue = lvalue;
 	}
 	RL_MALLOC(value, sizeof(unsigned char) * MAX_LLONG_DIGITS);
-	valuelen = snprintf((char *)value, MAX_LLONG_DIGITS, "%lld", lvalue);
+	valuelen = snprintf((char *)value, MAX_LLONG_DIGITS, "%" PRId64 "", lvalue);
 	RL_CALL(rl_set, RL_OK, db, key, keylen, value, valuelen, 0, expires);
 	retval = RL_OK;
 cleanup:
@@ -190,15 +190,15 @@ cleanup:
 	return retval;
 }
 
-int rl_incrbyfloat(struct rlite *db, const unsigned char *key, long keylen, double increment, double *newvalue)
+int rl_incrbyfloat(struct rlite *db, const unsigned char *key, int64_t keylen, double increment, double *newvalue)
 {
-	long page_number;
+	int64_t page_number;
 	int retval;
 	unsigned char *value = NULL;
 	char *end;
-	long valuelen;
+	int64_t valuelen;
 	double dvalue;
-	unsigned long long expires;
+	uint64_t expires;
 	RL_CALL2(rl_string_get_objects, RL_OK, RL_NOT_FOUND, db, key, keylen, &page_number, &expires, NULL);
 	if (retval == RL_NOT_FOUND) {
 		RL_MALLOC(value, sizeof(unsigned char) * MAX_DOUBLE_DIGITS);
@@ -238,13 +238,13 @@ cleanup:
 	return retval;
 }
 
-int rl_getbit(struct rlite *db, const unsigned char *key, long keylen, long bitoffset, int *value)
+int rl_getbit(struct rlite *db, const unsigned char *key, int64_t keylen, int64_t bitoffset, int *value)
 {
 	int retval;
 	unsigned char *rangevalue = NULL;
-	long rangevaluelen, start;
+	int64_t rangevaluelen, start;
 	start = bitoffset >> 3;
-	long bit = 7 - (bitoffset & 0x7);
+	int64_t bit = 7 - (bitoffset & 0x7);
 	RL_CALL2(rl_getrange, RL_OK, RL_NOT_FOUND, db, key, keylen, start, start, &rangevalue, &rangevaluelen);
 	if (retval == RL_NOT_FOUND || rangevaluelen == 0) {
 		*value = 0;
@@ -258,17 +258,17 @@ cleanup:
 	return retval;
 }
 
-int rl_setbit(struct rlite *db, const unsigned char *key, long keylen, long bitoffset, int on, int *previousvalue)
+int rl_setbit(struct rlite *db, const unsigned char *key, int64_t keylen, int64_t bitoffset, int on, int *previousvalue)
 {
 	int retval;
 	unsigned char *rangevalue = NULL;
-	long rangevaluelen, start;
+	int64_t rangevaluelen, start;
 	char val;
 	start = bitoffset >> 3;
-	long bit = 7 - (bitoffset & 0x7);
+	int64_t bit = 7 - (bitoffset & 0x7);
 
 	/* Limit offset to 512MB in bytes */
-	if ((bitoffset < 0) || ((unsigned long long)bitoffset >> 3) >= (512*1024*1024))
+	if ((bitoffset < 0) || ((uint64_t)bitoffset >> 3) >= (512*1024*1024))
 	{
 		retval = RL_INVALID_PARAMETERS;
 		goto cleanup;
@@ -299,14 +299,14 @@ cleanup:
 	return retval;
 }
 
-int rl_bitop(struct rlite *db, int op, const unsigned char *dest, long destlen, unsigned long keyc, const unsigned char **keys, long *keyslen)
+int rl_bitop(struct rlite *db, int op, const unsigned char *dest, int64_t destlen, uint64_t keyc, const unsigned char **keys, int64_t *keyslen)
 {
-	long ltmp;
+	int64_t ltmp;
 	int retval;
 	unsigned char **values = NULL, *result;
-	unsigned long *valueslen = NULL, i;
-	long resultlen;
-	RL_MALLOC(valueslen, sizeof(unsigned long) * keyc);
+	uint64_t *valueslen = NULL, i;
+	int64_t resultlen;
+	RL_MALLOC(valueslen, sizeof(uint64_t) * keyc);
 	RL_MALLOC(values, sizeof(unsigned char *) * keyc);
 	values[0] = NULL;
 	for (i = 0; i < keyc; i++) {
@@ -339,23 +339,23 @@ cleanup:
 	return retval;
 }
 
-int rl_bitcount(struct rlite *db, const unsigned char *key, long keylen, long start, long stop, long *bitcount)
+int rl_bitcount(struct rlite *db, const unsigned char *key, int64_t keylen, int64_t start, int64_t stop, int64_t *bitcount)
 {
 	int retval;
 	unsigned char *value;
-	long valuelen;
+	int64_t valuelen;
 	RL_CALL(rl_getrange, RL_OK, db, key, keylen, start, stop, &value, &valuelen);
-	*bitcount = (long)rl_redisPopcount(value, valuelen);
+	*bitcount = (int64_t)rl_redisPopcount(value, valuelen);
 	rl_free(value);
 cleanup:
 	return retval;
 }
 
-int rl_bitpos(struct rlite *db, const unsigned char *key, long keylen, int bit, long start, long stop, int end_given, long *position)
+int rl_bitpos(struct rlite *db, const unsigned char *key, int64_t keylen, int bit, int64_t start, int64_t stop, int end_given, int64_t *position)
 {
 	int retval;
 	unsigned char *value = NULL;
-	long valuelen, totalsize;
+	int64_t valuelen, totalsize;
 
 	if (bit != 0 && bit != 1) {
 		retval = RL_INVALID_PARAMETERS;
@@ -373,7 +373,7 @@ int rl_bitpos(struct rlite *db, const unsigned char *key, long keylen, int bit, 
 	RL_CALL(rl_get, RL_OK, db, key, keylen, NULL, &totalsize);
 	RL_CALL(rl_normalize_string_range, RL_OK, totalsize, &start, &stop);
 
-	long bytes = stop - start + 1;
+	int64_t bytes = stop - start + 1;
 	// stop may be after the end of the string and in that case it is treated
 	// as if it had 0 padding
 	//
@@ -382,7 +382,7 @@ int rl_bitpos(struct rlite *db, const unsigned char *key, long keylen, int bit, 
 	if (bytes < valuelen) {
 		bytes = valuelen;
 	}
-	long pos = rl_internal_bitpos(value, bytes, bit);
+	int64_t pos = rl_internal_bitpos(value, bytes, bit);
 
 	/* If we are looking for clear bits, and the user specified an exact
 	 * range with start-end, we can't consider the right of the range as
@@ -408,12 +408,12 @@ cleanup:
 	return retval;
 }
 
-int rl_pfadd(struct rlite *db, const unsigned char *key, long keylen, int elementc, unsigned char **elements, long *elementslen, int *updated)
+int rl_pfadd(struct rlite *db, const unsigned char *key, int64_t keylen, int elementc, unsigned char **elements, int64_t *elementslen, int *updated)
 {
 	int retval;
 	unsigned char *value = NULL;
-	long valuelen = 0;
-	unsigned long long expires = 0;
+	int64_t valuelen = 0;
+	uint64_t expires = 0;
 
 	RL_CALL2(rl_get, RL_OK, RL_NOT_FOUND, db, key, keylen, &value, &valuelen);
 	if (retval == RL_OK) {
@@ -440,15 +440,15 @@ cleanup:
 	return retval;
 }
 
-int rl_pfcount(struct rlite *db, int keyc, const unsigned char **keys, long *keyslen, long *count)
+int rl_pfcount(struct rlite *db, int keyc, const unsigned char **keys, int64_t *keyslen, int64_t *count)
 {
 	int retval;
 	unsigned char **argv = NULL;
-	long *argvlen = NULL;
-	long i;
+	int64_t *argvlen = NULL;
+	int64_t i;
 	unsigned char *newvalue = NULL;
-	long newvaluelen;
-	unsigned long long expires = 0;
+	int64_t newvaluelen;
+	uint64_t expires = 0;
 
 	RL_MALLOC(argvlen, sizeof(unsigned char *) * keyc);
 	RL_MALLOC(argv, sizeof(unsigned char *) * keyc);
@@ -482,14 +482,14 @@ cleanup:
 	return retval;
 }
 
-int rl_pfmerge(struct rlite *db, const unsigned char *destkey, long destkeylen, int keyc, const unsigned char **keys, long *keyslen)
+int rl_pfmerge(struct rlite *db, const unsigned char *destkey, int64_t destkeylen, int keyc, const unsigned char **keys, int64_t *keyslen)
 {
 	int retval;
 	unsigned char **argv = NULL, *newvalue = NULL;
-	long *argvlen = NULL, newvaluelen;
-	long i;
+	int64_t *argvlen = NULL, newvaluelen;
+	int64_t i;
 	int argc = keyc + 1;
-	unsigned long long expires = 0;
+	uint64_t expires = 0;
 
 	RL_MALLOC(argvlen, sizeof(unsigned char *) * argc);
 	RL_MALLOC(argv, sizeof(unsigned char *) * argc);
@@ -523,11 +523,11 @@ cleanup:
 	return retval;
 }
 
-int rl_pfdebug_getreg(struct rlite *db, const unsigned char *key, long keylen, int *size, long **elements)
+int rl_pfdebug_getreg(struct rlite *db, const unsigned char *key, int64_t keylen, int *size, int64_t **elements)
 {
 	int retval;
 	unsigned char *value = NULL;
-	long valuelen = 0;
+	int64_t valuelen = 0;
 	RL_CALL(rl_get, RL_OK, db, key, keylen, &value, &valuelen);
 	retval = rl_str_pfdebug_getreg(value, valuelen, size, elements, &value, &valuelen);
 	if (retval != 0) {
@@ -546,11 +546,11 @@ cleanup:
 	return retval;
 }
 
-int rl_pfdebug_decode(struct rlite *db, const unsigned char *key, long keylen, unsigned char **value, long *valuelen)
+int rl_pfdebug_decode(struct rlite *db, const unsigned char *key, int64_t keylen, unsigned char **value, int64_t *valuelen)
 {
 	int retval;
 	unsigned char *str = NULL;
-	long strlen;
+	int64_t strlen;
 	RL_CALL(rl_get, RL_OK, db, key, keylen, &str, &strlen);
 	retval = rl_str_pfdebug_decode(str, strlen, value, valuelen);
 	if (retval != 0) {
@@ -567,11 +567,11 @@ cleanup:
 	return retval;
 }
 
-int rl_pfdebug_encoding(struct rlite *db, const unsigned char *key, long keylen, unsigned char **value, long *valuelen)
+int rl_pfdebug_encoding(struct rlite *db, const unsigned char *key, int64_t keylen, unsigned char **value, int64_t *valuelen)
 {
 	int retval;
 	unsigned char *str = NULL;
-	long strlen;
+	int64_t strlen;
 	RL_CALL(rl_get, RL_OK, db, key, keylen, &str, &strlen);
 	retval = rl_str_pfdebug_encoding(str, strlen, value, valuelen);
 	if (retval != 0) {
@@ -588,12 +588,12 @@ cleanup:
 	return retval;
 }
 
-int rl_pfdebug_todense(struct rlite *db, const unsigned char *key, long keylen, int *converted)
+int rl_pfdebug_todense(struct rlite *db, const unsigned char *key, int64_t keylen, int *converted)
 {
 	int retval;
 	unsigned char *str = NULL;
-	long strlen;
-	unsigned long long expires = 0;
+	int64_t strlen;
+	uint64_t expires = 0;
 	RL_CALL(rl_get, RL_OK, db, key, keylen, &str, &strlen);
 	retval = rl_str_pfdebug_todense(str, strlen, &str, &strlen);
 	if (retval != 0 && retval != 1) {
@@ -615,12 +615,12 @@ cleanup:
 	return retval;
 }
 
-int rl_string_pages(struct rlite *db, long page, short *pages)
+int rl_string_pages(struct rlite *db, int64_t page, short *pages)
 {
 	return rl_multi_string_pages(db, page, pages);
 }
 
-int rl_string_delete(struct rlite *db, long value_page)
+int rl_string_delete(struct rlite *db, int64_t value_page)
 {
 	return rl_multi_string_delete(db, value_page);
 }

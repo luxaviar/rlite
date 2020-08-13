@@ -1,8 +1,8 @@
-#include <sys/file.h>
+#include "rlite/port/file.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
+#include "rlite/port/unistd.h"
 #include <errno.h>
 #include "rlite/page_btree.h"
 #include "rlite/page_list.h"
@@ -153,7 +153,11 @@ static int file_driver_fp(rlite *db)
 	if (driver->fp == NULL) {
 		char *mode;
 		if (access(driver->filename, F_OK) == 0) {
+#ifdef _MSC_VER
+			mode = "rb+";
+#else
 			mode = "r+";
+#endif
 		}
 		else {
 			if ((driver->mode & RLITE_OPEN_READWRITE) == 0) {
@@ -161,7 +165,11 @@ static int file_driver_fp(rlite *db)
 				retval = RL_INVALID_PARAMETERS;
 				goto cleanup;
 			}
+#ifdef _MSC_VER
+			mode = "wb+";
+#else
 			mode = "w+";
+#endif
 		}
 		driver->fp = fopen(driver->filename, mode);
 		if (driver->fp == NULL) {
@@ -189,7 +197,7 @@ int rl_header_serialize(struct rlite *db, void *UNUSED(obj), unsigned char *data
 	put_4bytes(&data[identifier_len + 4], db->next_empty_page);
 	put_4bytes(&data[identifier_len + 8], db->number_of_pages);
 	put_4bytes(&data[identifier_len + 12], db->number_of_databases);
-	long i, pos = identifier_len + 16;
+	int64_t i, pos = identifier_len + 16;
 	for (i = 0; i < db->number_of_databases + RLITE_INTERNAL_DB_COUNT; i++) {
 		if (db->databases[i] != 0) {
 			put_4bytes(&data[pos], db->databases[i]);
@@ -216,10 +224,10 @@ int rl_header_deserialize(struct rlite *db, void **UNUSED(obj), void *UNUSED(con
 	db->number_of_databases = get_4bytes(&data[identifier_len + 12]);
 	rl_free(db->databases);
 	rl_free(db->initial_databases);
-	RL_MALLOC(db->databases, sizeof(long) * (db->number_of_databases + RLITE_INTERNAL_DB_COUNT));
-	RL_MALLOC(db->initial_databases, sizeof(long) * (db->number_of_databases + RLITE_INTERNAL_DB_COUNT));
+	RL_MALLOC(db->databases, sizeof(int64_t) * (db->number_of_databases + RLITE_INTERNAL_DB_COUNT));
+	RL_MALLOC(db->initial_databases, sizeof(int64_t) * (db->number_of_databases + RLITE_INTERNAL_DB_COUNT));
 
-	long i, pos = identifier_len + 16;
+	int64_t i, pos = identifier_len + 16;
 	for (i = 0; i < db->number_of_databases + RLITE_INTERNAL_DB_COUNT; i++) {
 		db->initial_databases[i] =
 		db->databases[i] = get_4bytes(&data[pos]);
@@ -396,8 +404,8 @@ int rl_create_db(rlite *db)
 	db->selected_internal = RLITE_INTERNAL_DB_NO;
 	db->initial_number_of_databases =
 	db->number_of_databases = 16;
-	RL_MALLOC(db->databases, sizeof(long) * (db->number_of_databases + RLITE_INTERNAL_DB_COUNT));
-	RL_MALLOC(db->initial_databases, sizeof(long) * (db->number_of_databases + RLITE_INTERNAL_DB_COUNT));
+	RL_MALLOC(db->databases, sizeof(int64_t) * (db->number_of_databases + RLITE_INTERNAL_DB_COUNT));
+	RL_MALLOC(db->initial_databases, sizeof(int64_t) * (db->number_of_databases + RLITE_INTERNAL_DB_COUNT));
 	for (i = 0; i < db->number_of_databases + RLITE_INTERNAL_DB_COUNT; i++) {
 		db->initial_databases[i] =
 		db->databases[i] = 0;
@@ -469,28 +477,28 @@ cleanup:
 void print_cache(rlite *db)
 {
 	printf("Cache read pages:");
-	long i;
+	int64_t i;
 	rl_page *page;
 	for (i = 0; i < db->read_pages_len; i++) {
 		page = db->read_pages[i];
-		printf("%ld, ", page->page_number);
+		printf("%" PRId64 ", ", page->page_number);
 	}
 	printf("\nCache write pages:");
 	for (i = 0; i < db->write_pages_len; i++) {
 		page = db->write_pages[i];
-		printf("%ld, ", page->page_number);
+		printf("%" PRId64 ", ", page->page_number);
 	}
 	printf("\n");
 }
 #endif
 
 #ifdef RL_DEBUG
-int rl_search_cache(rlite *db, rl_data_type *type, long page_number, void **obj, long *position, void *context, rl_page **pages, long page_len)
+int rl_search_cache(rlite *db, rl_data_type *type, int64_t page_number, void **obj, int64_t *position, void *context, rl_page **pages, int64_t page_len)
 #else
-static int rl_search_cache(rlite *db, rl_data_type *type, long page_number, void **obj, long *position, void *context, rl_page **pages, long page_len)
+static int rl_search_cache(rlite *db, rl_data_type *type, int64_t page_number, void **obj, int64_t *position, void *context, rl_page **pages, int64_t page_len)
 #endif
 {
-	long pos, min = 0, max = page_len - 1;
+	int64_t pos, min = 0, max = page_len - 1;
 	rl_page *page;
 	if (max >= 0) {
 		do {
@@ -537,7 +545,7 @@ static int rl_search_cache(rlite *db, rl_data_type *type, long page_number, void
 				pos++;
 			}
 #ifdef RL_DEBUG
-			long i, prev;
+			int64_t i, prev;
 			rl_page *p;
 			for (i = 0; i < db->read_pages_len; i++) {
 				p = db->read_pages[i];
@@ -573,7 +581,7 @@ static int rl_search_cache(rlite *db, rl_data_type *type, long page_number, void
 	return RL_NOT_FOUND;
 }
 
-int rl_read_from_cache(rlite *db, rl_data_type *type, long page_number, void *context, void **obj)
+int rl_read_from_cache(rlite *db, rl_data_type *type, int64_t page_number, void *context, void **obj)
 {
 	int retval = rl_search_cache(db, type, page_number, obj, NULL, context, db->write_pages, db->write_pages_len);
 	if (retval == RL_NOT_FOUND) {
@@ -582,12 +590,12 @@ int rl_read_from_cache(rlite *db, rl_data_type *type, long page_number, void *co
 	return retval;
 }
 
-int rl_read(rlite *db, rl_data_type *type, long page, void *context, void **obj, int cache)
+int rl_read(rlite *db, rl_data_type *type, int64_t page, void *context, void **obj, int cache)
 {
-	// fprintf(stderr, "r %ld %s\n", page, type->name);
+	// fprintf(stderr, "r %" PRId64 " %s\n", page, type->name);
 #ifdef RL_DEBUG
 	int keep = 0;
-	long initial_page_size = db->page_size;
+	int64_t initial_page_size = db->page_size;
 	if (page == 0 && type != &rl_data_type_header) {
 		VALGRIND_PRINTF_BACKTRACE("Unexpected");
 		return RL_UNEXPECTED;
@@ -625,7 +633,7 @@ int rl_read(rlite *db, rl_data_type *type, long page, void *context, void **obj,
 #ifdef RL_DEBUG
 				print_cache(db);
 #endif
-				fprintf(stderr, "Unable to read page %ld on line %d\n", page, __LINE__);
+				fprintf(stderr, "Unable to read page %" PRId64 " on line %d\n", page, __LINE__);
 				perror(NULL);
 			}
 			retval = RL_NOT_FOUND;
@@ -635,19 +643,19 @@ int rl_read(rlite *db, rl_data_type *type, long page, void *context, void **obj,
 	else if (db->driver_type == RL_MEMORY_DRIVER) {
 		rl_memory_driver *driver = db->driver;
 		if ((page + 1) * db->page_size > driver->datalen) {
-			fprintf(stderr, "Unable to read page %ld on line %d\n", page, __LINE__);
+			fprintf(stderr, "Unable to read page %" PRId64 " on line %d\n", page, __LINE__);
 			retval = RL_NOT_FOUND;
 			goto cleanup;
 		}
 		memcpy(data, &driver->data[page * db->page_size], sizeof(unsigned char) * db->page_size);
 	}
 	else {
-		fprintf(stderr, "Unexpected driver %d when asking for page %ld\n", db->driver_type, page);
+		fprintf(stderr, "Unexpected driver %d when asking for page %" PRId64 "\n", db->driver_type, page);
 		retval = RL_UNEXPECTED;
 		goto cleanup;
 	}
 
-	long pos;
+	int64_t pos;
 	retval = rl_search_cache(db, type, page, NULL, &pos, context, db->read_pages, db->read_pages_len);
 	if (retval != RL_NOT_FOUND) {
 		fprintf(stderr, "Unexpectedly found page in cache\n");
@@ -706,10 +714,10 @@ int rl_read(rlite *db, rl_data_type *type, long page, void *context, void **obj,
 		}
 		if (memcmp(data, serialize_data, db->page_size) != 0) {
 			fprintf(stderr, "serialize unserialized data mismatch\n");
-			long i;
+			int64_t i;
 			for (i = 0; i < db->page_size; i++) {
 				if (serialize_data[i] != data[i]) {
-					fprintf(stderr, "at position %ld expected %d, got %d\n", i, serialize_data[i], data[i]);
+					fprintf(stderr, "at position %" PRId64 " expected %d, got %d\n", i, serialize_data[i], data[i]);
 				}
 			}
 		}
@@ -736,10 +744,10 @@ cleanup:
 	return retval;
 }
 
-int rl_alloc_page_number(rlite *db, long *_page_number)
+int rl_alloc_page_number(rlite *db, int64_t *_page_number)
 {
 	int retval = RL_OK;
-	long page_number = db->next_empty_page;
+	int64_t page_number = db->next_empty_page;
 	if (page_number == db->number_of_pages) {
 		db->next_empty_page++;
 		db->number_of_pages++;
@@ -754,11 +762,11 @@ cleanup:
 	return retval;
 }
 
-int rl_write(struct rlite *db, rl_data_type *type, long page_number, void *obj)
+int rl_write(struct rlite *db, rl_data_type *type, int64_t page_number, void *obj)
 {
-	// fprintf(stderr, "w %ld %s\n", page_number, type->name);
+	// fprintf(stderr, "w %" PRId64 " %s\n", page_number, type->name);
 	rl_page *page = NULL;
-	long pos;
+	int64_t pos;
 	int retval;
 
 	if (page_number == db->next_empty_page) {
@@ -830,9 +838,9 @@ cleanup:
 	return retval;
 }
 
-int rl_purge_cache(struct rlite *db, long page_number)
+int rl_purge_cache(struct rlite *db, int64_t page_number)
 {
-	long pos;
+	int64_t pos;
 	int retval;
 	retval = rl_search_cache(db, NULL, page_number, NULL, &pos, NULL, db->write_pages, db->write_pages_len);
 	if (retval == RL_FOUND) {
@@ -853,7 +861,7 @@ cleanup:
 	return retval;
 }
 
-int rl_delete(struct rlite *db, long page_number)
+int rl_delete(struct rlite *db, int64_t page_number)
 {
 	int retval, i;
 	for (i = 0; i < db->number_of_databases + RLITE_INTERNAL_DB_COUNT; i++) {
@@ -870,7 +878,7 @@ cleanup:
 
 int rl_dirty_hash(struct rlite *db, unsigned char **hash)
 {
-	long i;
+	int64_t i;
 	int retval = RL_OK;
 	rl_page *page;
 	SHA1_CTX sha;
@@ -910,8 +918,8 @@ int rl_commit(struct rlite *db)
 	db->initial_number_of_pages = db->number_of_pages;
 	db->initial_number_of_databases = db->number_of_databases;
 	rl_free(db->initial_databases);
-	RL_MALLOC(db->initial_databases, sizeof(long) * (db->number_of_databases + RLITE_INTERNAL_DB_COUNT));
-	memcpy(db->initial_databases, db->databases, sizeof(long) * (db->number_of_databases + RLITE_INTERNAL_DB_COUNT));
+	RL_MALLOC(db->initial_databases, sizeof(int64_t) * (db->number_of_databases + RLITE_INTERNAL_DB_COUNT));
+	memcpy(db->initial_databases, db->databases, sizeof(int64_t) * (db->number_of_databases + RLITE_INTERNAL_DB_COUNT));
 	rl_discard(db);
 cleanup:
 	return retval;
@@ -919,7 +927,7 @@ cleanup:
 
 int rl_discard(struct rlite *db)
 {
-	long i;
+	int64_t i;
 	void *tmp;
 	int retval = RL_OK;
 
@@ -964,9 +972,9 @@ int rl_discard(struct rlite *db)
 	db->number_of_pages = db->initial_number_of_pages;
 	db->number_of_databases = db->initial_number_of_databases;
 	rl_free(db->databases);
-	RL_MALLOC(db->databases, sizeof(long) * (db->number_of_databases + RLITE_INTERNAL_DB_COUNT)); // ?
+	RL_MALLOC(db->databases, sizeof(int64_t) * (db->number_of_databases + RLITE_INTERNAL_DB_COUNT)); // ?
 	if (db->initial_databases) {
-		memcpy(db->databases, db->initial_databases, sizeof(long) *  (db->number_of_databases + RLITE_INTERNAL_DB_COUNT));
+		memcpy(db->databases, db->initial_databases, sizeof(int64_t) *  (db->number_of_databases + RLITE_INTERNAL_DB_COUNT));
 	}
 
 	if (db->read_pages_alloc != DEFAULT_READ_PAGES_LEN) {
@@ -1059,9 +1067,9 @@ cleanup:
 int rl_is_balanced(rlite *db)
 {
 	int retval;
-	long i, selected_database = db->selected_database;
+	int64_t i, selected_database = db->selected_database;
 	short *pages = NULL;
-	long missing_pages = 0;
+	int64_t missing_pages = 0;
 	RL_MALLOC(pages, sizeof(short) * db->number_of_pages);
 
 	for (i = 1; i < db->number_of_pages; i++) {
@@ -1079,7 +1087,7 @@ int rl_is_balanced(rlite *db)
 
 	RL_CALL(rl_select, RL_OK, db, selected_database);
 
-	long page_number = db->next_empty_page;
+	int64_t page_number = db->next_empty_page;
 	while (page_number != db->number_of_pages) {
 		pages[page_number] = 1;
 		RL_CALL(rl_long_get, RL_OK, db, &page_number, page_number);
@@ -1087,13 +1095,13 @@ int rl_is_balanced(rlite *db)
 
 	for (i = 1; i < db->number_of_pages; i++) {
 		if (pages[i] == 0) {
-			fprintf(stderr, "Found orphan page %ld\n", i);
+			fprintf(stderr, "Found orphan page %" PRId64 "\n", i);
 			missing_pages++;
 		}
 	}
 
 	if (missing_pages) {
-		fprintf(stderr, "Missing %ld pages\n", missing_pages);
+		fprintf(stderr, "Missing %" PRId64 " pages\n", missing_pages);
 		retval = RL_UNEXPECTED;
 	}
 cleanup:
@@ -1116,13 +1124,13 @@ int rl_select(struct rlite *db, int selected_database)
 	return RL_OK;
 }
 
-int rl_move(struct rlite *db, unsigned char *key, long keylen, int database)
+int rl_move(struct rlite *db, unsigned char *key, int64_t keylen, int database)
 {
 	int retval;
 	int olddb = db->selected_database;
 	unsigned char type;
-	unsigned long long expires;
-	long value_page;
+	uint64_t expires;
+	int64_t value_page;
 	// this could be more efficient, if we don't delete the value page
 	RL_CALL(rl_key_get, RL_FOUND, db, key, keylen, &type, NULL, &value_page, &expires, NULL);
 	RL_CALL(rl_select, RL_OK, db, database);
@@ -1137,13 +1145,13 @@ cleanup:
 	return retval;
 }
 
-int rl_rename(struct rlite *db, const unsigned char *src, long srclen, const unsigned char *target, long targetlen, int overwrite)
+int rl_rename(struct rlite *db, const unsigned char *src, int64_t srclen, const unsigned char *target, int64_t targetlen, int overwrite)
 {
 	int retval;
 	unsigned char type;
-	unsigned long long expires;
-	long value_page;
-	long version = 0;
+	uint64_t expires;
+	int64_t value_page;
+	int64_t version = 0;
 	if (overwrite) {
 		RL_CALL2(rl_key_get, RL_FOUND, RL_NOT_FOUND, db, target, targetlen, NULL, NULL, NULL, NULL, &version);
 		if (retval == RL_FOUND) {
@@ -1163,7 +1171,7 @@ cleanup:
 	return retval;
 }
 
-int rl_dbsize(struct rlite *db, long *size)
+int rl_dbsize(struct rlite *db, int64_t *size)
 {
 	int retval;
 	rl_btree *btree;
@@ -1182,16 +1190,16 @@ cleanup:
 	return retval;
 }
 
-int rl_keys(struct rlite *db, unsigned char *pattern, long patternlen, long *_len, unsigned char ***_result, long **_resultlen)
+int rl_keys(struct rlite *db, unsigned char *pattern, int64_t patternlen, int64_t *_len, unsigned char ***_result, int64_t **_resultlen)
 {
 	int retval;
 	rl_btree *btree;
 	rl_btree_iterator *iterator;
 	rl_key *key;
 	void *tmp;
-	long alloc, len;
+	int64_t alloc, len;
 	unsigned char **result = NULL, *keystr;
-	long *resultlen = NULL, keystrlen;
+	int64_t *resultlen = NULL, keystrlen;
 	retval = rl_get_key_btree(db, &btree, 0);
 	if (retval == RL_NOT_FOUND) {
 		*_len = 0;
@@ -1209,7 +1217,7 @@ int rl_keys(struct rlite *db, unsigned char *pattern, long patternlen, long *_le
 	len = 0;
 	alloc = 16;
 	RL_MALLOC(result, sizeof(unsigned char *) * alloc);
-	RL_MALLOC(resultlen, sizeof(long) * alloc);
+	RL_MALLOC(resultlen, sizeof(int64_t) * alloc);
 	int allkeys = patternlen == 1 && pattern[0] == '*';
 	while ((retval = rl_btree_iterator_next(iterator, NULL, &tmp)) == RL_OK) {
 		key = tmp;
@@ -1217,7 +1225,7 @@ int rl_keys(struct rlite *db, unsigned char *pattern, long patternlen, long *_le
 		if (allkeys || rl_stringmatchlen((char *)pattern, patternlen, (char *)keystr, keystrlen, 0)) {
 			if (len + 1 == alloc) {
 				RL_REALLOC(result, sizeof(unsigned char *) * alloc * 2)
-				RL_REALLOC(resultlen, sizeof(long) * alloc * 2)
+				RL_REALLOC(resultlen, sizeof(int64_t) * alloc * 2)
 				alloc *= 2;
 			}
 			result[len] = keystr;
@@ -1248,7 +1256,7 @@ cleanup:
 	return retval;
 }
 
-int rl_randomkey(struct rlite *db, unsigned char **key, long *keylen)
+int rl_randomkey(struct rlite *db, unsigned char **key, int64_t *keylen)
 {
 	int retval;
 	rl_btree *btree;

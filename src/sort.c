@@ -35,16 +35,16 @@
 #include <math.h> /* isnan() */
 #include <errno.h>
 
-int strcoll(const char *, const char *);
+//int strcoll(const char *, const char *);
 
 static int sort_desc = 0;
 static int sort_alpha = 0;
 static int sort_bypattern = 0;
 static int sort_store = 0;
 
-static int compareString(unsigned char *obj1, long obj1len, unsigned char *obj2, long obj2len) {
+static int compareString(unsigned char *obj1, int64_t obj1len, unsigned char *obj2, int64_t obj2len) {
 	int cmp;
-	long minlen = obj1len > obj2len ? obj2len : obj1len;
+	int64_t minlen = obj1len > obj2len ? obj2len : obj1len;
 	cmp = memcmp(obj1, obj2, minlen);
 	if (cmp == 0 && obj1len != obj2len) {
 		cmp = obj1len > obj2len ? 1 : -1;
@@ -75,14 +75,14 @@ static int compareObjectsAsLongLong(const rliteSortObject *so1, const rliteSortO
  *
  * The returned object will always have its refcount increased by 1
  * when it is non-NULL. */
-static int lookupKeyByPattern(rlite *db, unsigned char *pattern, long patternlen, unsigned char *subst, long sublen, unsigned char **retobj, long *retobjlen) {
+static int lookupKeyByPattern(rlite *db, unsigned char *pattern, int64_t patternlen, unsigned char *subst, int64_t sublen, unsigned char **retobj, int64_t *retobjlen) {
 	int retval = RL_OK;
 	unsigned char type;
 	unsigned char *p, *f;
 	unsigned char *key = NULL;
-	long keylen;
+	int64_t keylen;
 	unsigned char *field = NULL;
-	long fieldlen = 0;
+	int64_t fieldlen = 0;
 	int prefixlen, postfixlen;
 
 	/* If the pattern is "#" return the substitution object itself in order
@@ -210,18 +210,18 @@ static int sortCompare(const void *s1, const void *s2) {
 	return sort_desc ? -cmp : cmp;
 }
 
-int rl_sort(struct rlite *db, unsigned char *key, long keylen, unsigned char *sortby, long sortbylen, int dontsort, int inLuaScript, int alpha, int desc, long limit_start, long limit_count, int getc, unsigned char **getv, long *getvlen, unsigned char *storekey, long storekeylen, long *retobjc, unsigned char ***retobjv, long **retobjvlen) {
+int rl_sort(struct rlite *db, unsigned char *key, int64_t keylen, unsigned char *sortby, int64_t sortbylen, int dontsort, int inLuaScript, int alpha, int desc, int64_t limit_start, int64_t limit_count, int getc, unsigned char **getv, int64_t *getvlen, unsigned char *storekey, int64_t storekeylen, int64_t *retobjc, unsigned char ***retobjv, int64_t **retobjvlen) {
 	int i, j, k, retval;
-	long vectorlen, start, end;
-	long size;
+	int64_t vectorlen, start, end;
+	int64_t size;
 	unsigned char **values = NULL, *value;
-	long *valueslen = NULL, valuelen;
+	int64_t *valueslen = NULL, valuelen;
 	rliteSortObject *vector = NULL;
 	/* Lookup the key to sort. It must be of the right types */
 	unsigned char type;
-	long objc;
+	int64_t objc;
 	unsigned char **objv = NULL;
-	long *objvlen = NULL;
+	int64_t *objvlen = NULL;
 
 	if (storekey) {
 		RL_CALL2(rl_key_delete_with_value, RL_OK, RL_NOT_FOUND, db, storekey, storekeylen);
@@ -400,7 +400,7 @@ int rl_sort(struct rlite *db, unsigned char *key, long keylen, unsigned char *so
 	if (dontsort == 0) {
 		for (j = 0; j < vectorlen; j++) {
 			unsigned char *byval;
-			long byvallen;
+			int64_t byvallen;
 			if (sortby) {
 				/* lookup value to sort by */
 				RL_CALL2(lookupKeyByPattern, RL_OK, RL_NOT_FOUND, db, sortby, sortbylen, vector[j].obj, vector[j].objlen, &byval, &byvallen);
@@ -457,7 +457,7 @@ int rl_sort(struct rlite *db, unsigned char *key, long keylen, unsigned char *so
 	 * GET/DEL/INCR/DECR operations if any. */
 	objc = getc ? getc*(end-start+1) : end-start+1;
 	RL_MALLOC(objv, sizeof(unsigned char *) * objc);
-	RL_MALLOC(objvlen, sizeof(long) * objc);
+	RL_MALLOC(objvlen, sizeof(int64_t) * objc);
 
 	for (i = 0, j = start; j <= end; j++) {
 		if (getc) {

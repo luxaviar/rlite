@@ -982,12 +982,18 @@ static int json_is_invalid_number(json_parse_t *json)
         return 0;                           /* Ordinary number */
     }
 
+#ifdef _WIN32
+    if (!_strnicmp(p, "inf", 3))
+            return 1;
+    if (!_strnicmp(p, "nan", 3))
+        return 1;
+#else
     /* Reject inf/nan */
     if (!strncasecmp(p, "inf", 3))
         return 1;
     if (!strncasecmp(p, "nan", 3))
         return 1;
-
+#endif
     /* Pass all other numbers which may still be invalid, but
      * strtod() will catch them. */
     return 0;

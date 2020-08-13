@@ -15,10 +15,10 @@ TEST basic_test_zadd_zscore(int _commit)
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	double score = 1.41, score2;
 	unsigned char *data = UNSIGN("my data");
-	long datalen = strlen((char *)data);
+	int64_t datalen = strlen((char *)data);
 
 	RL_CALL_VERBOSE(rl_zadd, RL_OK, db, key, keylen, score, data, datalen);
 	RL_BALANCED();
@@ -38,13 +38,13 @@ TEST basic_test_zadd_zscore2(int _commit)
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	double score = 8913.109, score2;
 	unsigned char *data = UNSIGN("my data");
-	long datalen = strlen((char *)data);
+	int64_t datalen = strlen((char *)data);
 	unsigned char *data2 = UNSIGN("my data2");
-	long datalen2 = strlen((char *)data2);
-	long card;
+	int64_t datalen2 = strlen((char *)data2);
+	int64_t card;
 
 	RL_CALL_VERBOSE(rl_zadd, RL_OK, db, key, keylen, score, data, datalen);
 	RL_BALANCED();
@@ -77,13 +77,13 @@ TEST basic_test_zadd_zrank(int _commit)
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	double score = 8913.109;
-	long rank;
+	int64_t rank;
 	unsigned char *data = UNSIGN("my data");
-	long datalen = strlen((char *)data);
+	int64_t datalen = strlen((char *)data);
 	unsigned char *data2 = UNSIGN("my data2");
-	long datalen2 = strlen((char *)data2);
+	int64_t datalen2 = strlen((char *)data2);
 
 	RL_CALL_VERBOSE(rl_zadd, RL_OK, db, key, keylen, score, data, datalen);
 	RL_BALANCED();
@@ -114,10 +114,10 @@ TEST basic_test_invalidlex()
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, 0, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	double score = 1.41;
 	unsigned char *data = UNSIGN("my data");
-	long datalen = strlen((char *)data);
+	int64_t datalen = strlen((char *)data);
 
 	RL_CALL_VERBOSE(rl_zadd, RL_OK, db, key, keylen, score, data, datalen);
 	RL_CALL_VERBOSE(rl_zrangebylex, RL_INVALID_PARAMETERS, db, key, keylen, UNSIGN("foo"), 3, UNSIGN("bar"), 3, 0, -1, NULL);
@@ -134,9 +134,9 @@ TEST basic_test_zadd_zrange(int _commit)
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, 0, 1);
 
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 
-	long i, setdatalen = 1;
+	int64_t i, setdatalen = 1;
 	unsigned char setdata[1];
 	for (i = 0; i < 200; i++) {
 		setdata[0] = i;
@@ -146,7 +146,7 @@ TEST basic_test_zadd_zrange(int _commit)
 	}
 
 	unsigned char *data;
-	long datalen;
+	int64_t datalen;
 	double score;
 	rl_zset_iterator* iterator;
 
@@ -182,14 +182,14 @@ TEST basic_test_zadd_zrange(int _commit)
 	PASS();
 }
 
-TEST test_zrangebylex(rlite *db, unsigned char *key, long keylen, long initial, long size, long total_size, unsigned char min[3], long minlen, unsigned char max[3], long maxlen, long offset, long limit)
+TEST test_zrangebylex(rlite *db, unsigned char *key, int64_t keylen, int64_t initial, int64_t size, int64_t total_size, unsigned char min[3], int64_t minlen, unsigned char max[3], int64_t maxlen, int64_t offset, int64_t limit)
 {
 	rl_zset_iterator *iterator;
-	long lexcount;
+	int64_t lexcount;
 	int retval;
 	unsigned char *data2;
-	long data2_len;
-	long i;
+	int64_t data2_len;
+	int64_t i;
 	if (offset == 0 && limit == 0) {
 		// These test expect different values if offset or limit exist
 		RL_CALL2_VERBOSE(rl_zlexcount, RL_OK, RL_NOT_FOUND, db, key, keylen, min, minlen, max, maxlen, &lexcount);
@@ -247,10 +247,10 @@ TEST basic_test_zadd_zrangebylex(int _commit)
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 
 	unsigned char data[2];
-	long i;
+	int64_t i;
 	for (i = 0; i < ZRANGEBYLEX_SIZE; i++) {
 		data[0] = 'a' + (i / 2);
 		data[1] = 'A' + i;
@@ -293,12 +293,12 @@ TEST basic_test_zadd_zrangebylex_with_empty(int _commit)
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *min = UNSIGN("-");
 	unsigned char *max = UNSIGN("(a");
-	long lexcount;
+	int64_t lexcount;
 	unsigned char *data2;
-	long data2_len;
+	int64_t data2_len;
 
 	RL_CALL_VERBOSE(rl_zadd, RL_OK, db, key, keylen, 0.0, UNSIGN(""), 0);
 	RL_BALANCED();
@@ -330,15 +330,15 @@ TEST basic_test_zadd_zrangebylex_with_empty(int _commit)
 	PASS();
 }
 
-TEST test_zrangebyscore(rlite *db, unsigned char *key, long keylen, rl_zrangespec *range, long size, double base_score, double step)
+TEST test_zrangebyscore(rlite *db, unsigned char *key, int64_t keylen, rl_zrangespec *range, int64_t size, double base_score, double step)
 {
 	rl_zset_iterator *iterator;
-	long offset = 0, limit = -1;
+	int64_t offset = 0, limit = -1;
 	int retval;
 	RL_CALL2_VERBOSE(rl_zrangebyscore, RL_OK, RL_NOT_FOUND, db, key, keylen, range, offset, limit, &iterator);
 	if (size != 0 || retval != RL_NOT_FOUND) {
 		double score;
-		long i = 0;
+		int64_t i = 0;
 		while ((retval = rl_zset_iterator_next(iterator, NULL, &score, NULL, NULL)) == RL_OK) {
 			EXPECT_DOUBLE(score, base_score + i * step);
 			i++;
@@ -350,7 +350,7 @@ TEST test_zrangebyscore(rlite *db, unsigned char *key, long keylen, rl_zrangespe
 	RL_CALL2_VERBOSE(rl_zrevrangebyscore, RL_OK, RL_NOT_FOUND, db, key, keylen, range, offset, limit, &iterator);
 	if (size != 0 || retval != RL_NOT_FOUND) {
 		double score;
-		long i = size - 1;
+		int64_t i = size - 1;
 		while ((retval = rl_zset_iterator_next(iterator, NULL, &score, NULL, NULL)) == RL_OK) {
 			EXPECT_DOUBLE(score, base_score + i * step);
 			i--;
@@ -370,10 +370,10 @@ TEST basic_test_zadd_zrangebyscore(int _commit)
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 
 	unsigned char data[1];
-	long i;
+	int64_t i;
 	for (i = 0; i < ZRANGEBYSCORE_SIZE; i++) {
 		data[0] = 'a' + i;
 		RL_CALL_VERBOSE(rl_zadd, RL_OK, db, key, keylen, i, data, 1);
@@ -414,13 +414,13 @@ TEST basic_test_zadd_zrem(int _commit)
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	double score = 8913.109;
-	long rank;
+	int64_t rank;
 	unsigned char *data = UNSIGN("my data");
-	long datalen = strlen((char *)data);
+	int64_t datalen = strlen((char *)data);
 	unsigned char *data2 = UNSIGN("my data2");
-	long datalen2 = strlen((char *)data2);
+	int64_t datalen2 = strlen((char *)data2);
 
 	RL_CALL_VERBOSE(rl_zadd, RL_OK, db, key, keylen, score, data, datalen);
 	RL_BALANCED();
@@ -429,8 +429,8 @@ TEST basic_test_zadd_zrem(int _commit)
 	RL_BALANCED();
 
 	unsigned char *members[1] = {data};
-	long members_len[1] = {datalen};
-	long changed;
+	int64_t members_len[1] = {datalen};
+	int64_t changed;
 	RL_CALL_VERBOSE(rl_zrem, RL_OK, db, key, keylen, 1, members, members_len, &changed);
 	RL_BALANCED();
 
@@ -442,7 +442,7 @@ TEST basic_test_zadd_zrem(int _commit)
 	EXPECT_LONG(rank, 0);
 
 	unsigned char *members2[2] = {data, data2};
-	long members_len2[2] = {datalen, datalen2};
+	int64_t members_len2[2] = {datalen, datalen2};
 	RL_CALL_VERBOSE(rl_zrem, RL_OK, db, key, keylen, 2, members2, members_len2, &changed);
 	EXPECT_LONG(changed, 1);
 	RL_BALANCED();
@@ -459,13 +459,13 @@ TEST basic_test_zadd_zcount(int _commit)
 	int retval;
 
 	rlite *db = NULL;
-	long datalen = 20;
+	int64_t datalen = 20;
 	unsigned char *data = malloc(sizeof(unsigned char) * datalen);
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
-	long i, count;
+	int64_t keylen = strlen((char *)key);
+	int64_t i, count;
 
 	for (i = 0; i < datalen; i++) {
 		data[i] = i;
@@ -521,10 +521,10 @@ TEST basic_test_zadd_zincrby(int _commit)
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	double score = 4.2;
 	unsigned char *data = UNSIGN("my data");
-	long datalen = strlen((char *)data);
+	int64_t datalen = strlen((char *)data);
 	double newscore;
 
 	RL_CALL_VERBOSE(rl_zincrby, RL_OK, db, key, keylen, score, data, datalen, &newscore);
@@ -547,10 +547,10 @@ TEST basic_test_zadd_dupe(int _commit)
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	double score = 4.2, newscore;
 	unsigned char *data = UNSIGN("my data");
-	long datalen = strlen((char *)data);
+	int64_t datalen = strlen((char *)data);
 
 	RL_CALL_VERBOSE(rl_zadd, RL_OK, db, key, keylen, score, data, datalen);
 	RL_BALANCED();
@@ -573,9 +573,9 @@ TEST basic_test_zincrnan(int _commit)
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *data = UNSIGN("my data");
-	long datalen = strlen((char *)data);
+	int64_t datalen = strlen((char *)data);
 
 	RL_CALL_VERBOSE(rl_zadd, RL_OK, db, key, keylen, INFINITY, data, datalen);
 	RL_BALANCED();
@@ -588,14 +588,14 @@ TEST basic_test_zincrnan(int _commit)
 }
 #define ZINTERSTORE_KEYS 4
 #define ZINTERSTORE_MEMBERS 10
-TEST basic_test_zadd_zinterstore(int _commit, long params[5])
+TEST basic_test_zadd_zinterstore(int _commit, int64_t params[5])
 {
 	unsigned char *data = NULL;
 	int retval;
 
-	long keys_len[ZINTERSTORE_KEYS];
+	int64_t keys_len[ZINTERSTORE_KEYS];
 	unsigned char *keys[ZINTERSTORE_KEYS];
-	long i, j;
+	int64_t i, j;
 	for (i = 0; i < ZINTERSTORE_KEYS; i++) {
 		keys[i] = malloc(sizeof(unsigned char));
 		keys[i][0] = 'a' + i;
@@ -633,7 +633,7 @@ TEST basic_test_zadd_zinterstore(int _commit, long params[5])
 	EXPECT_LONG(iterator->size, ZINTERSTORE_MEMBERS);
 
 	i = 0;
-	long datalen;
+	int64_t datalen;
 	double score;
 	while ((retval = rl_zset_iterator_next(iterator, NULL, &score, &data, &datalen)) == RL_OK) {
 		EXPECT_DOUBLE(score, i * params[4]);
@@ -655,14 +655,14 @@ TEST basic_test_zadd_zinterstore(int _commit, long params[5])
 	PASS();
 }
 
-TEST basic_test_sadd_zinterstore(int _commit, long params[5])
+TEST basic_test_sadd_zinterstore(int _commit, int64_t params[5])
 {
 	unsigned char *data = NULL;
 	int retval;
 
-	long keys_len[ZINTERSTORE_KEYS];
+	int64_t keys_len[ZINTERSTORE_KEYS];
 	unsigned char *keys[ZINTERSTORE_KEYS];
-	long i;
+	int64_t i;
 	for (i = 0; i < ZINTERSTORE_KEYS; i++) {
 		keys[i] = malloc(sizeof(unsigned char));
 		keys[i][0] = 'a' + i;
@@ -673,7 +673,7 @@ TEST basic_test_sadd_zinterstore(int _commit, long params[5])
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
 	unsigned char *members[ZINTERSTORE_MEMBERS];
-	long memberslen[ZINTERSTORE_MEMBERS];
+	int64_t memberslen[ZINTERSTORE_MEMBERS];
 	for (i = 0; i < ZINTERSTORE_MEMBERS; i++) {
 		members[i] = malloc(sizeof(unsigned char));
 		members[i][0] = 'A' + i;
@@ -703,7 +703,7 @@ TEST basic_test_sadd_zinterstore(int _commit, long params[5])
 	EXPECT_LONG(iterator->size, ZINTERSTORE_MEMBERS);
 
 	i = 0;
-	long datalen;
+	int64_t datalen;
 	double score;
 	while ((retval = rl_zset_iterator_next(iterator, NULL, &score, &data, &datalen)) == RL_OK) {
 		EXPECT_DOUBLE(score, params[4]);
@@ -728,13 +728,13 @@ TEST basic_test_sadd_zinterstore(int _commit, long params[5])
 
 #define ZUNIONSTORE_KEYS 4
 #define ZUNIONSTORE_MEMBERS 10
-TEST basic_test_zadd_zunionstore(int _commit, long params[5])
+TEST basic_test_zadd_zunionstore(int _commit, int64_t params[5])
 {
 	int retval;
 
-	long keys_len[ZUNIONSTORE_KEYS];
+	int64_t keys_len[ZUNIONSTORE_KEYS];
 	unsigned char *keys[ZUNIONSTORE_KEYS];
-	long i, j;
+	int64_t i, j;
 	for (i = 0; i < ZUNIONSTORE_KEYS; i++) {
 		keys[i] = malloc(sizeof(unsigned char));
 		keys[i][0] = 'a' + i;
@@ -775,9 +775,9 @@ TEST basic_test_zadd_zunionstore(int _commit, long params[5])
 	EXPECT_LONG(iterator->size, ZUNIONSTORE_MEMBERS + ZUNIONSTORE_KEYS - 1);
 	i = 0;
 	unsigned char *data;
-	long datalen;
+	int64_t datalen;
 	double score, exp_score;
-	long pos;
+	int64_t pos;
 	while ((retval = rl_zset_iterator_next(iterator, NULL, &score, &data, &datalen)) == RL_OK) {
 		EXPECT_LONG(datalen, 1);
 		if (data[0] == (unsigned char)(CHAR_MAX - 1) || data[0] == (unsigned char)(CHAR_MAX - 2) || data[0] == (unsigned char)(CHAR_MAX - 3)) {
@@ -811,7 +811,7 @@ TEST basic_test_zadd_zremrangebyrank(int _commit)
 
 #define ZREMRANGEBYRANK_SIZE 20
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key), i, changed;
+	int64_t keylen = strlen((char *)key), i, changed;
 	unsigned char data[1];
 	for (i = 0; i < ZREMRANGEBYRANK_SIZE; i++) {
 		data[0] = i;
@@ -850,7 +850,7 @@ TEST basic_test_zadd_zremrangebyscore(int _commit)
 
 #define ZREMRANGEBYSCORE_SIZE 20
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key), i, changed;
+	int64_t keylen = strlen((char *)key), i, changed;
 	unsigned char data[1];
 	for (i = 0; i < ZREMRANGEBYSCORE_SIZE; i++) {
 		data[0] = i;
@@ -900,10 +900,10 @@ TEST basic_test_zadd_zremrangebylex(int _commit)
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 
 	unsigned char data[2];
-	long i;
+	int64_t i;
 	for (i = 0; i < ZRANGEBYLEX_SIZE; i++) {
 		data[0] = 'a' + (i / 2);
 		data[1] = 'A' + i;
@@ -914,7 +914,7 @@ TEST basic_test_zadd_zremrangebylex(int _commit)
 	unsigned char min[3];
 	unsigned char max[3];
 
-	long changed;
+	int64_t changed;
 #define run_remrangebylex(min, max, expected_changed)\
 	RL_CALL_VERBOSE(rl_zremrangebylex, RL_OK, db, key, keylen, UNSIGN(min), strlen(min), UNSIGN(max), strlen(max), &changed);\
 	EXPECT_LONG(changed, expected_changed);\
@@ -939,7 +939,7 @@ TEST regression_zrangebyscore(int _commit)
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 
 	unsigned char data[2];
 	// -inf a 1 b 2 c 3 d 4 e 5 f +inf g
@@ -985,14 +985,14 @@ TEST regression_zrangebyscore(int _commit)
 #define ZINTERSTORE_TESTS 7
 SUITE(type_zset_test)
 {
-	long sadd_zinterunionstore_tests[SADD_ZINTERSTORE_TESTS][5] = {
+	int64_t sadd_zinterunionstore_tests[SADD_ZINTERSTORE_TESTS][5] = {
 		{RL_ZSET_AGGREGATE_SUM, 0, 0, 0, 3},
 		{RL_ZSET_AGGREGATE_SUM, 1, 1, 1, 3},
 		{RL_ZSET_AGGREGATE_MIN, 1, 1, 1, 1},
 		{RL_ZSET_AGGREGATE_MAX, 1, 1, 1, 1},
 	};
 
-	long zinterunionstore_tests[ZINTERSTORE_TESTS][5] = {
+	int64_t zinterunionstore_tests[ZINTERSTORE_TESTS][5] = {
 		{RL_ZSET_AGGREGATE_SUM, 0, 0, 0, 6},
 		{RL_ZSET_AGGREGATE_SUM, 1, 1, 1, 6},
 		{RL_ZSET_AGGREGATE_MIN, 1, 1, 1, 1},

@@ -16,7 +16,7 @@ int rl_list_node_create(rlite *db, rl_list *list, rl_list_node **node);
 rl_list_type rl_list_type_long = {
 	&rl_data_type_list_long,
 	&rl_data_type_list_node_long,
-	sizeof(long),
+	sizeof(int64_t),
 	long_cmp,
 #ifdef RL_DEBUG
 	long_formatter,
@@ -55,9 +55,9 @@ int rl_list_node_serialize_long(rlite *UNUSED(db), void *obj, unsigned char *dat
 	put_4bytes(data, node->size);
 	put_4bytes(&data[4], node->left);
 	put_4bytes(&data[8], node->right);
-	long i, pos = 12;
+	int64_t i, pos = 12;
 	for (i = 0; i < node->size; i++) {
-		put_4bytes(&data[pos], *(long *)(node->elements[i]));
+		put_4bytes(&data[pos], *(int64_t *)(node->elements[i]));
 		pos += 4;
 	}
 	return RL_OK;
@@ -67,15 +67,15 @@ int rl_list_node_deserialize_long(rlite *db, void **obj, void *context, unsigned
 {
 	rl_list *list = context;
 	rl_list_node *node = NULL;
-	long i = 0, pos = 12;
+	int64_t i = 0, pos = 12;
 	int retval;
 	RL_CALL(rl_list_node_create, RL_OK, db, list, &node);
-	node->size = (long)get_4bytes(data);
-	node->left = (long)get_4bytes(&data[4]);
-	node->right = (long)get_4bytes(&data[8]);
+	node->size = (int64_t)get_4bytes(data);
+	node->left = (int64_t)get_4bytes(&data[4]);
+	node->right = (int64_t)get_4bytes(&data[8]);
 	for (i = 0; i < node->size; i++) {
-		RL_MALLOC(node->elements[i], sizeof(long))
-		*(long *)node->elements[i] = get_4bytes(&data[pos]);
+		RL_MALLOC(node->elements[i], sizeof(int64_t))
+		*(int64_t *)node->elements[i] = get_4bytes(&data[pos]);
 		pos += 4;
 	}
 	*obj = node;
@@ -112,7 +112,7 @@ cleanup:
 int rl_list_node_destroy(rlite *UNUSED(db), void *_node)
 {
 	rl_list_node *node = _node;
-	long i;
+	int64_t i;
 	if (node->elements) {
 		for (i = 0; i < node->size; i++) {
 			rl_free(node->elements[i]);
@@ -153,7 +153,7 @@ int rl_list_destroy(rlite *UNUSED(db), void *list)
 	return RL_OK;
 }
 
-int rl_list_find_element(rlite *db, rl_list *list, void *element, void **found_element, long *position, rl_list_node **found_node, long *found_node_page)
+int rl_list_find_element(rlite *db, rl_list *list, void *element, void **found_element, int64_t *position, rl_list_node **found_node, int64_t *found_node_page)
 {
 	if (!list->type->cmp) {
 		fprintf(stderr, "Trying to find an element without cmp\n");
@@ -161,7 +161,7 @@ int rl_list_find_element(rlite *db, rl_list *list, void *element, void **found_e
 	}
 	void *_node;
 	rl_list_node *node;
-	long pos = 0, i, number = list->left;
+	int64_t pos = 0, i, number = list->left;
 	int retval = RL_OK;
 	while (number != 0) {
 		RL_CALL(rl_read, RL_FOUND, db, list->type->list_node_type, number, list, &_node, 1);
@@ -192,11 +192,11 @@ cleanup:
 	return retval;
 }
 
-static int rl_find_element_by_position(rlite *db, rl_list *list, long *position, long *_pos, rl_list_node **_node, long *_number, int add)
+static int rl_find_element_by_position(rlite *db, rl_list *list, int64_t *position, int64_t *_pos, rl_list_node **_node, int64_t *_number, int add)
 {
 	rl_list_node *node;
 	void *tmp_node;
-	long pos = 0, number;
+	int64_t pos = 0, number;
 	if (*position >= list->size + add || *position <= - list->size - 1 - add) {
 		return RL_INVALID_PARAMETERS;
 	}
@@ -246,9 +246,9 @@ cleanup:
 	return retval;
 }
 
-int rl_list_get_element(struct rlite *db, rl_list *list, void **element, long position)
+int rl_list_get_element(struct rlite *db, rl_list *list, void **element, int64_t position)
 {
-	long pos;
+	int64_t pos;
 	rl_list_node *node;
 	int retval;
 	RL_CALL(rl_find_element_by_position, RL_FOUND, db, list, &position, &pos, &node, NULL, 0);
@@ -257,11 +257,11 @@ cleanup:
 	return retval;
 }
 
-int rl_list_add_element(rlite *db, rl_list *list, long list_page, void *element, long position)
+int rl_list_add_element(rlite *db, rl_list *list, int64_t list_page, void *element, int64_t position)
 {
 	rl_list_node *node, *sibling_node, *new_node, *old_node;
-	long pos;
-	long number, sibling_number;
+	int64_t pos;
+	int64_t number, sibling_number;
 	void *_node;
 	int retval;
 	RL_CALL(rl_find_element_by_position, RL_FOUND, db, list, &position, &pos, &node, &number, 1);
@@ -355,10 +355,10 @@ cleanup:
 	return retval;
 }
 
-int rl_list_remove_element(rlite *db, rl_list *list, long list_page, long position)
+int rl_list_remove_element(rlite *db, rl_list *list, int64_t list_page, int64_t position)
 {
 	rl_list_node *node, *sibling_node;
-	long pos, number;
+	int64_t pos, number;
 	void *_node;
 	int retval;
 	RL_CALL(rl_find_element_by_position, RL_FOUND, db, list, &position, &pos, &node, &number, 0);
@@ -462,14 +462,14 @@ cleanup:
 int rl_list_is_balanced(rlite *db, rl_list *list)
 {
 	rl_list_iterator *iterator;
-	long i = 0, number = list->left, size = 0;
-	long prev_size;
-	long max_node = (list->size / list->max_node_size + 1) * 2;
+	int64_t i = 0, number = list->left, size = 0;
+	int64_t prev_size;
+	int64_t max_node = (list->size / list->max_node_size + 1) * 2;
 	int retval = RL_OK;
-	long *left = NULL;
-	long *right = NULL;
-	RL_MALLOC(right, sizeof(long) * max_node);
-	RL_MALLOC(left, sizeof(long) * max_node);
+	int64_t *left = NULL;
+	int64_t *right = NULL;
+	RL_MALLOC(right, sizeof(int64_t) * max_node);
+	RL_MALLOC(left, sizeof(int64_t) * max_node);
 	rl_list_node *node;
 	void *_node;
 	while (number != 0) {
@@ -493,7 +493,7 @@ int rl_list_is_balanced(rlite *db, rl_list *list)
 		prev_size = node->size;
 		number = node->right;
 		if (i >= 2 && right[i - 2] != left[i]) {
-			fprintf(stderr, "Left and right pointers mismatch at position %ld\n", i);
+			fprintf(stderr, "Left and right pointers mismatch at position %" PRId64 "\n", i);
 			retval = RL_INVALID_STATE;
 			goto cleanup;
 		}
@@ -501,7 +501,7 @@ int rl_list_is_balanced(rlite *db, rl_list *list)
 	}
 
 	if (size != list->size) {
-		fprintf(stderr, "Expected size %ld, got %ld\n", size, list->size);
+		fprintf(stderr, "Expected size %" PRId64 ", got %" PRId64 "\n", size, list->size);
 		retval = RL_UNEXPECTED;
 		goto cleanup;
 	}
@@ -515,7 +515,7 @@ int rl_list_is_balanced(rlite *db, rl_list *list)
 		goto cleanup;
 	}
 	if (i != size) {
-		fprintf(stderr, "Expected to iterate %ld times but only did %ld\n", size, i);
+		fprintf(stderr, "Expected to iterate %" PRId64 " times but only did %" PRId64 "\n", size, i);
 		retval = RL_UNEXPECTED;
 		goto cleanup;
 	}
@@ -529,7 +529,7 @@ int rl_list_is_balanced(rlite *db, rl_list *list)
 		goto cleanup;
 	}
 	if (i != size) {
-		fprintf(stderr, "Expected to iterate %ld times but only did %ld\n", size, i);
+		fprintf(stderr, "Expected to iterate %" PRId64 " times but only did %" PRId64 "\n", size, i);
 		retval = RL_UNEXPECTED;
 		goto cleanup;
 	}
@@ -553,7 +553,7 @@ int rl_print_list(rlite *db, rl_list *list)
 	void *_node;
 	char *element;
 	int size;
-	long i, number = list->left;
+	int64_t i, number = list->left;
 	int retval = RL_OK;
 	while (number != 0) {
 		RL_CALL(rl_read, RL_FOUND, db, list->type->list_node_type, number, list, &_node, 1);
@@ -574,7 +574,7 @@ cleanup:
 
 int rl_flatten_list(rlite *db, rl_list *list, void **scores)
 {
-	long i, number = list->left, pos = 0;
+	int64_t i, number = list->left, pos = 0;
 	rl_list_node *node;
 	void *_node;
 	int retval = RL_OK;
@@ -643,8 +643,8 @@ int rl_list_iterator_next(rl_list_iterator *iterator, void **element)
 	}
 	iterator->node_position += iterator->direction;
 	if (iterator->node_position < 0 || iterator->node_position == iterator->node->size) {
-		long next_node_page = iterator->direction == 1 ? iterator->node->right : iterator->node->left;
-		RL_CALL(rl_list_node_nocache_destroy, RL_OK, iterator->db, iterator->node);
+		int64_t next_node_page = iterator->direction == 1 ? iterator->node->right : iterator->node->left;
+		RL_CALL_EXACT2(rl_list_node_nocache_destroy, RL_OK, iterator->db, iterator->node);
 		iterator->node = NULL;
 		if (next_node_page) {
 			void *_node;
@@ -669,7 +669,7 @@ int rl_list_pages(struct rlite *db, rl_list *list, short *pages)
 {
 	rl_list_node *node;
 	void *_node;
-	long number = list->left;
+	int64_t number = list->left;
 	int retval = RL_OK;
 	pages[number] = 1;
 	while (number != 0) {
@@ -689,7 +689,7 @@ int rl_list_delete(struct rlite *db, rl_list *list)
 {
 	rl_list_node *node;
 	void *_node;
-	long number = list->left, new_number;
+	int64_t number = list->left, new_number;
 	int retval = RL_OK;
 	while (number != 0) {
 		RL_CALL(rl_read, RL_FOUND, db, list->type->list_node_type, number, list, &_node, 1);

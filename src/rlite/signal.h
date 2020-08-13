@@ -1,7 +1,7 @@
 #ifndef _RL_FIFO_H
 #define _RL_FIFO_H
 
-#include <sys/time.h>
+#include "rlite/port/time.h"
 
 int rl_create_signal(const char *signal_name);
 int rl_delete_signal(const char *signal_name);

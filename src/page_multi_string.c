@@ -7,7 +7,7 @@
 #include "rlite/page_multi_string.h"
 #include "rlite/util.h"
 
-int rl_normalize_string_range(long totalsize, long *start, long *stop)
+int rl_normalize_string_range(int64_t totalsize, int64_t *start, int64_t *stop)
 {
 	if (*start < 0) {
 		*start += totalsize;
@@ -30,7 +30,7 @@ int rl_normalize_string_range(long totalsize, long *start, long *stop)
 	return RL_OK;
 }
 
-int rl_multi_string_cmp(struct rlite *db, long p1, long p2, int *cmp)
+int rl_multi_string_cmp(struct rlite *db, int64_t p1, int64_t p2, int *cmp)
 {
 	rl_list *list1 = NULL, *list2 = NULL;
 	rl_list_node *node1 = NULL, *node2 = NULL;
@@ -43,7 +43,7 @@ int rl_multi_string_cmp(struct rlite *db, long p1, long p2, int *cmp)
 	RL_CALL(rl_read, RL_FOUND, db, &rl_data_type_list_long, p2, &rl_list_type_long, &_list, 0);
 	list2 = _list;
 
-	long node_number1 = list1->left, node_number2 = list2->left, i;
+	int64_t node_number1 = list1->left, node_number2 = list2->left, i;
 	int first = 1;
 	while (1) {
 		if (node_number1 == 0 || node_number2 == 0) {
@@ -64,12 +64,12 @@ int rl_multi_string_cmp(struct rlite *db, long p1, long p2, int *cmp)
 		RL_CALL(rl_read, RL_FOUND, db, list2->type->list_node_type, node_number2, list2, &_node, 0);
 		node2 = _node;
 		if (first) {
-			if (*(long *)node1->elements[0] == 0) {
+			if (*(int64_t *)node1->elements[0] == 0) {
 				*cmp = -1;
 				retval = RL_OK;
 				goto cleanup;
 			}
-			if (*(long *)node2->elements[0] == 0) {
+			if (*(int64_t *)node2->elements[0] == 0) {
 				*cmp = 1;
 				retval = RL_OK;
 				goto cleanup;
@@ -77,8 +77,8 @@ int rl_multi_string_cmp(struct rlite *db, long p1, long p2, int *cmp)
 		}
 		for (i = first ? 1 : 0; i < node1->size; i++) {
 			first = 0;
-			RL_CALL(rl_string_get, RL_OK, db, &str1, *(long *)node1->elements[i]);
-			RL_CALL(rl_string_get, RL_OK, db, &str2, *(long *)node2->elements[i]);
+			RL_CALL(rl_string_get, RL_OK, db, &str1, *(int64_t *)node1->elements[i]);
+			RL_CALL(rl_string_get, RL_OK, db, &str2, *(int64_t *)node2->elements[i]);
 			*cmp = memcmp(str1, str2, db->page_size);
 			if (*cmp != 0) {
 				if (*cmp < 0) {
@@ -108,7 +108,7 @@ cleanup:
 	return retval;
 }
 
-int rl_multi_string_cmp_str(struct rlite *db, long p1, unsigned char *str, long len, int *cmp)
+int rl_multi_string_cmp_str(struct rlite *db, int64_t p1, unsigned char *str, int64_t len, int *cmp)
 {
 	rl_list *list1 = NULL;
 	rl_list_node *node1 = NULL;
@@ -119,10 +119,10 @@ int rl_multi_string_cmp_str(struct rlite *db, long p1, unsigned char *str, long 
 	RL_CALL(rl_read, RL_FOUND, db, &rl_data_type_list_long, p1, &rl_list_type_long, &_list, 0);
 	list1 = _list;
 
-	long node_number1 = list1->left, i, pos = 0;
+	int64_t node_number1 = list1->left, i, pos = 0;
 	int first = 1;
-	long cmplen;
-	long stored_length = 0;
+	int64_t cmplen;
+	int64_t stored_length = 0;
 	*cmp = 0;
 	do {
 		if (node_number1 == 0) {
@@ -132,13 +132,13 @@ int rl_multi_string_cmp_str(struct rlite *db, long p1, unsigned char *str, long 
 		RL_CALL(rl_read, RL_FOUND, db, list1->type->list_node_type, node_number1, list1, &_node, 0);
 		node1 = _node;
 		if (first) {
-			stored_length = *(long *)node1->elements[0];
+			stored_length = *(int64_t *)node1->elements[0];
 			if (stored_length == 0) {
 				*cmp = len == 0 ? 0 : -1;
 			}
 		}
 		for (i = first ? 1 : 0; i < node1->size; i++) {
-			RL_CALL(rl_string_get, RL_OK, db, &str1, *(long *)node1->elements[i]);
+			RL_CALL(rl_string_get, RL_OK, db, &str1, *(int64_t *)node1->elements[i]);
 			cmplen = db->page_size < len - pos ? db->page_size : len - pos;
 			if (cmplen == 0) {
 				// finished with str, the page_multi_string starts with str
@@ -175,11 +175,11 @@ cleanup:
 	return retval;
 }
 
-static int append(struct rlite *db, rl_list *list, long list_page_number, const unsigned char *data, long size)
+static int append(struct rlite *db, rl_list *list, int64_t list_page_number, const unsigned char *data, int64_t size)
 {
 	int retval = RL_OK;
-	long *page = NULL;
-	long pos = 0, to_copy;
+	int64_t *page = NULL;
+	int64_t pos = 0, to_copy;
 	unsigned char *string = NULL;
 	while (pos < size) {
 		RL_MALLOC(page, sizeof(*page));
@@ -200,22 +200,22 @@ cleanup:
 	return retval;
 }
 
-int rl_multi_string_append(struct rlite *db, long number, const unsigned char *data, long datasize, long *newlength)
+int rl_multi_string_append(struct rlite *db, int64_t number, const unsigned char *data, int64_t datasize, int64_t *newlength)
 {
 	rl_list *list = NULL;
 	unsigned char *tmp_data;
 	void *tmp;
 	int retval;
-	long size, cpsize;
-	long string_page_number;
+	int64_t size, cpsize;
+	int64_t string_page_number;
 
 	RL_CALL(rl_read, RL_FOUND, db, &rl_data_type_list_long, number, &rl_list_type_long, &tmp, 0);
 	list = tmp;
 
 	RL_CALL(rl_list_get_element, RL_FOUND, db, list, &tmp, 0);
-	size = *(long *)tmp;
-	RL_MALLOC(tmp, sizeof(long));
-	*(long *)tmp = size + datasize;
+	size = *(int64_t *)tmp;
+	RL_MALLOC(tmp, sizeof(int64_t));
+	*(int64_t *)tmp = size + datasize;
 	RL_CALL(rl_list_add_element, RL_OK, db, list, number, tmp, 0);
 	RL_CALL(rl_list_remove_element, RL_OK, db, list, number, 1);
 	if (newlength) {
@@ -226,7 +226,7 @@ int rl_multi_string_append(struct rlite *db, long number, const unsigned char *d
 
 	if (size > 0) {
 		RL_CALL(rl_list_get_element, RL_FOUND, db, list, &tmp, -1);
-		string_page_number = *(long *)tmp;
+		string_page_number = *(int64_t *)tmp;
 		RL_CALL(rl_string_get, RL_OK, db, &tmp_data, string_page_number);
 		cpsize = db->page_size - size;
 		if (cpsize > datasize) {
@@ -247,9 +247,9 @@ cleanup:
 	return retval;
 }
 
-int rl_multi_string_cpyrange(struct rlite *db, long number, unsigned char *data, long *_size, long start, long stop)
+int rl_multi_string_cpyrange(struct rlite *db, int64_t number, unsigned char *data, int64_t *_size, int64_t start, int64_t stop)
 {
-	long totalsize;
+	int64_t totalsize;
 	rl_list *list = NULL;
 	rl_list_node *node = NULL;
 	void *_list, *tmp;
@@ -257,11 +257,11 @@ int rl_multi_string_cpyrange(struct rlite *db, long number, unsigned char *data,
 	RL_CALL(rl_read, RL_FOUND, db, &rl_data_type_list_long, number, &rl_list_type_long, &_list, 0);
 	list = _list;
 	unsigned char *tmp_data;
-	long i, pos = 0, pagesize, pagestart;
-	long size;
+	int64_t i, pos = 0, pagesize, pagestart;
+	int64_t size;
 
 	RL_CALL(rl_list_get_element, RL_FOUND, db, list, &tmp, 0);
-	totalsize = *(long *)tmp;
+	totalsize = *(int64_t *)tmp;
 	if (totalsize == 0) {
 		if (_size) {
 			*_size = 0;
@@ -288,7 +288,7 @@ int rl_multi_string_cpyrange(struct rlite *db, long number, unsigned char *data,
 	// the first element in the list is the length of the array, skip to the second
 	for (i++; i < list->size; i++) {
 		RL_CALL(rl_list_get_element, RL_FOUND, db, list, &tmp, i);
-		RL_CALL(rl_string_get, RL_OK, db, &tmp_data, *(long *)tmp);
+		RL_CALL(rl_string_get, RL_OK, db, &tmp_data, *(int64_t *)tmp);
 		pagesize = db->page_size - pagestart;
 		if (pos + pagesize > size) {
 			pagesize = size - pos;
@@ -308,9 +308,9 @@ cleanup:
 	return retval;
 }
 
-int rl_multi_string_getrange(struct rlite *db, long number, unsigned char **_data, long *size, long start, long stop)
+int rl_multi_string_getrange(struct rlite *db, int64_t number, unsigned char **_data, int64_t *size, int64_t start, int64_t stop)
 {
-	long totalsize;
+	int64_t totalsize;
 	rl_list *list = NULL;
 	rl_list_node *node = NULL;
 	void *_list, *tmp;
@@ -319,10 +319,10 @@ int rl_multi_string_getrange(struct rlite *db, long number, unsigned char **_dat
 	RL_CALL(rl_read, RL_FOUND, db, &rl_data_type_list_long, number, &rl_list_type_long, &_list, 0);
 	list = _list;
 	unsigned char *tmp_data;
-	long i, pos = 0, pagesize, pagestart;
+	int64_t i, pos = 0, pagesize, pagestart;
 
 	RL_CALL(rl_list_get_element, RL_FOUND, db, list, &tmp, 0);
-	totalsize = *(long *)tmp;
+	totalsize = *(int64_t *)tmp;
 	if (totalsize == 0) {
 		*size = 0;
 		if (_data) {
@@ -354,7 +354,7 @@ int rl_multi_string_getrange(struct rlite *db, long number, unsigned char **_dat
 	// the first element in the list is the length of the array, skip to the second
 	for (i++; i < list->size; i++) {
 		RL_CALL(rl_list_get_element, RL_FOUND, db, list, &tmp, i);
-		RL_CALL(rl_string_get, RL_OK, db, &tmp_data, *(long *)tmp);
+		RL_CALL(rl_string_get, RL_OK, db, &tmp_data, *(int64_t *)tmp);
 		pagesize = db->page_size - pagestart;
 		if (pos + pagesize > *size) {
 			pagesize = *size - pos;
@@ -379,20 +379,20 @@ cleanup:
 	return retval;
 }
 
-int rl_multi_string_get(struct rlite *db, long number, unsigned char **_data, long *size)
+int rl_multi_string_get(struct rlite *db, int64_t number, unsigned char **_data, int64_t *size)
 {
 	return rl_multi_string_getrange(db, number, _data, size, 0, -1);
 }
 
-int rl_multi_string_cpy(struct rlite *db, long number, unsigned char *data, long *size)
+int rl_multi_string_cpy(struct rlite *db, int64_t number, unsigned char *data, int64_t *size)
 {
 	return rl_multi_string_cpyrange(db, number, data, size, 0, -1);
 }
 
-int rl_multi_string_set(struct rlite *db, long *number, const unsigned char *data, long size)
+int rl_multi_string_set(struct rlite *db, int64_t *number, const unsigned char *data, int64_t size)
 {
 	int retval;
-	long *page = NULL;
+	int64_t *page = NULL;
 	rl_list *list = NULL;
 	RL_CALL(rl_list_create, RL_OK, db, &list, &rl_list_type_long);
 	*number = db->next_empty_page;
@@ -405,23 +405,23 @@ int rl_multi_string_set(struct rlite *db, long *number, const unsigned char *dat
 cleanup:
 	return retval;
 }
-int rl_multi_string_setrange(struct rlite *db, long number, const unsigned char *data, long size, long offset, long *newlength)
+int rl_multi_string_setrange(struct rlite *db, int64_t number, const unsigned char *data, int64_t size, int64_t offset, int64_t *newlength)
 {
-	long oldsize, newsize;
+	int64_t oldsize, newsize;
 	rl_list *list = NULL;
 	void *_list, *tmp;
 	int retval;
 	RL_CALL(rl_read, RL_FOUND, db, &rl_data_type_list_long, number, &rl_list_type_long, &_list, 1);
 	list = _list;
 	unsigned char *tmp_data;
-	long i, pagesize, pagestart, page;
+	int64_t i, pagesize, pagestart, page;
 	if (offset < 0) {
 		retval = RL_INVALID_PARAMETERS;
 		goto cleanup;
 	}
 
 	RL_CALL(rl_list_get_element, RL_FOUND, db, list, &tmp, 0);
-	oldsize = *(long *)tmp;
+	oldsize = *(int64_t *)tmp;
 	if (oldsize > offset) {
 		i = offset / db->page_size;
 		pagestart = offset % db->page_size;
@@ -432,14 +432,14 @@ int rl_multi_string_setrange(struct rlite *db, long number, const unsigned char 
 		}
 		if (newsize > oldsize) {
 			RL_CALL(rl_list_remove_element, RL_OK, db, list, number, 0);
-			RL_MALLOC(tmp, sizeof(long));
-			*(long *)tmp = newsize;
+			RL_MALLOC(tmp, sizeof(int64_t));
+			*(int64_t *)tmp = newsize;
 			RL_CALL(rl_list_add_element, RL_OK, db, list, number, tmp, 0);
 		}
 
 		for (i++; size > 0 && i < list->size; i++) {
 			RL_CALL(rl_list_get_element, RL_FOUND, db, list, &tmp, i);
-			page = *(long *)tmp;
+			page = *(int64_t *)tmp;
 			RL_CALL(rl_string_get, RL_OK, db, &tmp_data, page);
 			pagesize = db->page_size - pagestart;
 			if (pagesize > size) {
@@ -478,10 +478,10 @@ cleanup:
 }
 
 
-int rl_multi_string_sha1(struct rlite *db, unsigned char digest[20], long number)
+int rl_multi_string_sha1(struct rlite *db, unsigned char digest[20], int64_t number)
 {
 	unsigned char *data;
-	long datalen;
+	int64_t datalen;
 	SHA1_CTX sha;
 	SHA1Init(&sha);
 
@@ -494,14 +494,14 @@ int rl_multi_string_sha1(struct rlite *db, unsigned char digest[20], long number
 
 	RL_CALL(rl_list_iterator_create, RL_OK, db, &iterator, list, 1);
 
-	long size = 0;
+	int64_t size = 0;
 	while ((retval = rl_list_iterator_next(iterator, &tmp)) == RL_OK) {
 		if (size == 0) {
-			size = *(long *)tmp;
+			size = *(int64_t *)tmp;
 			rl_free(tmp);
 			continue;
 		}
-		RL_CALL(rl_string_get, RL_OK, db, &data, *(long *)tmp);
+		RL_CALL(rl_string_get, RL_OK, db, &data, *(int64_t *)tmp);
 		datalen = size > db->page_size ? db->page_size : size;
 		SHA1Update(&sha, data, datalen);
 		size -= datalen;
@@ -513,7 +513,7 @@ int rl_multi_string_sha1(struct rlite *db, unsigned char digest[20], long number
 		goto cleanup;
 	}
 
-	RL_CALL(rl_list_nocache_destroy, RL_OK, db, list);
+	RL_CALL_EXACT2(rl_list_nocache_destroy, RL_OK, db, list);
 
 	SHA1Final(digest, &sha);
 	retval = RL_OK;
@@ -524,7 +524,7 @@ cleanup:
 	return retval;
 }
 
-int rl_multi_string_pages(struct rlite *db, long page, short *pages)
+int rl_multi_string_pages(struct rlite *db, int64_t page, short *pages)
 {
 	void *tmp;
 	rl_list *list;
@@ -542,7 +542,7 @@ int rl_multi_string_pages(struct rlite *db, long page, short *pages)
 			first = 0;
 		}
 		else {
-			pages[*(long *)tmp] = 1;
+			pages[*(int64_t *)tmp] = 1;
 		}
 		rl_free(tmp);
 	}
@@ -552,7 +552,7 @@ int rl_multi_string_pages(struct rlite *db, long page, short *pages)
 		goto cleanup;
 	}
 
-	RL_CALL(rl_list_nocache_destroy, RL_OK, db, list);
+	RL_CALL_EXACT2(rl_list_nocache_destroy, RL_OK, db, list)
 
 	retval = RL_OK;
 cleanup:
@@ -562,7 +562,7 @@ cleanup:
 	return retval;
 }
 
-int rl_multi_string_delete(struct rlite *db, long page)
+int rl_multi_string_delete(struct rlite *db, int64_t page)
 {
 	void *tmp;
 	rl_list *list;
@@ -579,7 +579,7 @@ int rl_multi_string_delete(struct rlite *db, long page)
 			first = 0;
 		}
 		else {
-			RL_CALL(rl_delete, RL_OK, db, *(long *)tmp);
+			RL_CALL(rl_delete, RL_OK, db, *(int64_t *)tmp);
 		}
 		rl_free(tmp);
 	}

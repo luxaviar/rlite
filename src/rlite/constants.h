@@ -1,4 +1,6 @@
 #define _POSIX_C_SOURCE 199309L
+#define __need_time_t
+#define __need_timespec
 
 #define RLITE_CRLF "\r\n"
 #define RLITE_STR_OK "OK"

@@ -1,8 +1,9 @@
-#include <unistd.h>
+#include "rlite/port/unistd.h"
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
 #include "util.h"
+#include "rlite/port/file.h"
 #include "../src/rlite/rlite.h"
 #include "rlite/util.h"
 
@@ -18,7 +19,7 @@ TEST test_rlite_page_cache()
 	db->read_pages = malloc(sizeof(rl_page *) * size);
 	db->read_pages_len = size;
 	db->read_pages_alloc = size;
-	long i;
+	int64_t i;
 	for (i = 0; i < size; i++) {
 		db->read_pages[i] = malloc(sizeof(rl_page));
 		db->read_pages[i]->page_number = i;
@@ -49,8 +50,8 @@ TEST test_has_key()
 	RL_CALL_VERBOSE(rl_open, RL_OK, filepath, &db, RLITE_OPEN_CREATE | RLITE_OPEN_READWRITE);
 	unsigned char type = 'C', type2;
 	const unsigned char *key = (unsigned char *)"random key";
-	long keylen = strlen((char *) key);
-	long value = 529, value2;
+	int64_t keylen = strlen((char *) key);
+	int64_t value = 529, value2;
 	RL_CALL_VERBOSE(rl_key_get, RL_NOT_FOUND, db, key, keylen, NULL, NULL, NULL, NULL, NULL);
 	RL_CALL_VERBOSE(rl_key_set, RL_OK, db, key, keylen, type, value, 0, 0);
 	RL_CALL_VERBOSE(rl_key_get, RL_FOUND, db, key, keylen, &type2, NULL, &value2, NULL, NULL);

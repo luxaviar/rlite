@@ -14,13 +14,13 @@ TEST basic_test_hset_hget(int _commit)
 
 	rlite *db = NULL;
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *field = UNSIGN("my field");
-	long fieldlen = strlen((char *)field);
+	int64_t fieldlen = strlen((char *)field);
 	unsigned char *data = UNSIGN("my data");
-	long datalen = strlen((char *)data);
+	int64_t datalen = strlen((char *)data);
 	unsigned char *data2 = NULL;
-	long data2len;
+	int64_t data2len;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
 	RL_CALL_VERBOSE(rl_hset, RL_OK, db, key, keylen, field, fieldlen, data, datalen, NULL, 0);
@@ -42,13 +42,13 @@ TEST basic_test_hset_hexists(int _commit)
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *field = UNSIGN("my field");
-	long fieldlen = strlen((char *)field);
+	int64_t fieldlen = strlen((char *)field);
 	unsigned char *field2 = UNSIGN("my field2");
-	long field2len = strlen((char *)field2);
+	int64_t field2len = strlen((char *)field2);
 	unsigned char *data = UNSIGN("my data");
-	long datalen = strlen((char *)data);
+	int64_t datalen = strlen((char *)data);
 
 	RL_CALL_VERBOSE(rl_hset, RL_OK, db, key, keylen, field, fieldlen, data, datalen, NULL, 0);
 	RL_BALANCED();
@@ -67,14 +67,14 @@ TEST basic_test_hset_hdel(int _commit)
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 
 	unsigned char *field = UNSIGN("my field");
-	long fieldlen = strlen((char *)field);
+	int64_t fieldlen = strlen((char *)field);
 	unsigned char *field2 = UNSIGN("my field2");
-	long field2len = strlen((char *)field2);
+	int64_t field2len = strlen((char *)field2);
 	unsigned char *data = UNSIGN("my data");
-	long datalen = strlen((char *)data);
+	int64_t datalen = strlen((char *)data);
 
 	RL_CALL_VERBOSE(rl_hset, RL_OK, db, key, keylen, field, fieldlen, data, datalen, NULL, 0);
 	RL_BALANCED();
@@ -82,9 +82,9 @@ TEST basic_test_hset_hdel(int _commit)
 	RL_CALL_VERBOSE(rl_hset, RL_OK, db, key, keylen, field2, field2len, data, datalen, NULL, 0);
 	RL_BALANCED();
 
-	long deleted;
+	int64_t deleted;
 	unsigned char *fields[3] = {field, field2, data};
-	long fieldslen[3] = {fieldlen, field2len, datalen};
+	int64_t fieldslen[3] = {fieldlen, field2len, datalen};
 
 	RL_CALL_VERBOSE(rl_hdel, RL_OK, db, key, keylen, 3, fields, fieldslen, &deleted);
 	RL_BALANCED();
@@ -104,18 +104,18 @@ TEST basic_test_hset_hgetall(int _commit)
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *field = UNSIGN("my field");
-	long fieldlen = strlen((char *)field);
+	int64_t fieldlen = strlen((char *)field);
 	unsigned char *field2 = UNSIGN("my field2");
-	long field2len = strlen((char *)field2);
+	int64_t field2len = strlen((char *)field2);
 	unsigned char *data = UNSIGN("my data");
-	long datalen = strlen((char *)data);
+	int64_t datalen = strlen((char *)data);
 	unsigned char *data2 = UNSIGN("my data2");
-	long data2len = strlen((char *)data2);
+	int64_t data2len = strlen((char *)data2);
 	rl_hash_iterator *iterator;
 	unsigned char *f, *m;
-	long fl, ml, i = 0;
+	int64_t fl, ml, i = 0;
 
 	RL_CALL_VERBOSE(rl_hset, RL_OK, db, key, keylen, field, fieldlen, data, datalen, NULL, 0);
 	RL_BALANCED();
@@ -148,20 +148,20 @@ TEST basic_test_hset_hgetall(int _commit)
 TEST basic_test_hset_hlen(int _commit)
 {
 	int retval;
-	long len;
+	int64_t len;
 
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *field = UNSIGN("my field");
-	long fieldlen = strlen((char *)field);
+	int64_t fieldlen = strlen((char *)field);
 	unsigned char *field2 = UNSIGN("my field2");
-	long field2len = strlen((char *)field2);
+	int64_t field2len = strlen((char *)field2);
 	unsigned char *data = UNSIGN("my data");
-	long datalen = strlen((char *)data);
+	int64_t datalen = strlen((char *)data);
 	unsigned char *data2 = UNSIGN("my data2");
-	long data2len = strlen((char *)data2);
+	int64_t data2len = strlen((char *)data2);
 
 	RL_CALL_VERBOSE(rl_hset, RL_OK, db, key, keylen, field, fieldlen, data, datalen, NULL, 0);
 	RL_BALANCED();
@@ -179,20 +179,20 @@ TEST basic_test_hset_hlen(int _commit)
 TEST basic_test_hsetnx(int _commit)
 {
 	int retval;
-	long added;
+	int64_t added;
 
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *field = UNSIGN("my field");
-	long fieldlen = strlen((char *)field);
+	int64_t fieldlen = strlen((char *)field);
 	unsigned char *data = UNSIGN("my data");
-	long datalen = strlen((char *)data);
+	int64_t datalen = strlen((char *)data);
 	unsigned char *data2 = UNSIGN("my data2");
-	long data2len = strlen((char *)data2);
+	int64_t data2len = strlen((char *)data2);
 	unsigned char *data3;
-	long data3len;
+	int64_t data3len;
 
 	RL_CALL_VERBOSE(rl_hset, RL_OK, db, key, keylen, field, fieldlen, data, datalen, &added, 0);
 	EXPECT_LONG(added, 1);
@@ -221,23 +221,23 @@ TEST basic_test_hsetnx(int _commit)
 TEST basic_test_hset_hmget(int _commit)
 {
 	int retval;
-	long added;
+	int64_t added;
 
 	rlite *db = NULL;
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *field = UNSIGN("my field");
-	long fieldlen = strlen((char *)field);
+	int64_t fieldlen = strlen((char *)field);
 	unsigned char *field2 = UNSIGN("my field2");
-	long field2len = strlen((char *)field2);
+	int64_t field2len = strlen((char *)field2);
 	unsigned char *data = UNSIGN("my data");
-	long datalen = strlen((char *)data);
+	int64_t datalen = strlen((char *)data);
 	unsigned char *data2 = UNSIGN("my data2");
-	long data2len = strlen((char *)data2);
+	int64_t data2len = strlen((char *)data2);
 	unsigned char *fields[3] = {field, (unsigned char *)"nonexistent", field2};
-	long fieldslen[3] = {fieldlen, strlen((char *)fields[1]), field2len};
+	int64_t fieldslen[3] = {fieldlen, strlen((char *)fields[1]), field2len};
 	unsigned char **datas = NULL;
-	long *dataslen = NULL;
+	int64_t *dataslen = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
 	RL_CALL_VERBOSE(rl_hset, RL_OK, db, key, keylen, field, fieldlen, data, datalen, &added, 0);
@@ -273,25 +273,25 @@ TEST basic_test_hmset_hmget(int _commit)
 
 	rlite *db = NULL;
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *field = UNSIGN("my field");
-	long fieldlen = strlen((char *)field);
+	int64_t fieldlen = strlen((char *)field);
 	unsigned char *field2 = UNSIGN("my field2");
-	long field2len = strlen((char *)field2);
+	int64_t field2len = strlen((char *)field2);
 	unsigned char *data = UNSIGN("my data");
-	long datalen = strlen((char *)data);
+	int64_t datalen = strlen((char *)data);
 	unsigned char *data2 = UNSIGN("my data2");
-	long data2len = strlen((char *)data2);
+	int64_t data2len = strlen((char *)data2);
 	unsigned char *fieldsset[3] = {field, field2};
-	long fieldslenset[3] = {fieldlen, field2len};
+	int64_t fieldslenset[3] = {fieldlen, field2len};
 	unsigned char *fieldsset2[3] = {field2, field};
-	long fieldslenset2[3] = {field2len, fieldlen};
+	int64_t fieldslenset2[3] = {field2len, fieldlen};
 	unsigned char *datasset[3] = {data, data2};
-	long dataslenset[3] = {datalen, data2len};
+	int64_t dataslenset[3] = {datalen, data2len};
 	unsigned char *fields[3] = {field, (unsigned char *)"nonexistent", field2};
-	long fieldslen[3] = {fieldlen, strlen((char *)fields[1]), field2len};
+	int64_t fieldslen[3] = {fieldlen, strlen((char *)fields[1]), field2len};
 	unsigned char **datas = NULL;
-	long *dataslen = NULL;
+	int64_t *dataslen = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
 	RL_CALL_VERBOSE(rl_hmset, RL_OK, db, key, keylen, 2, fieldsset, fieldslenset, datasset, dataslenset);
@@ -335,15 +335,15 @@ TEST basic_test_hmset_hmget(int _commit)
 TEST basic_test_hincrby_hget(int _commit)
 {
 	int retval;
-	long value;
+	int64_t value;
 
 	rlite *db = NULL;
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *field = UNSIGN("my field");
-	long fieldlen = strlen((char *)field);
+	int64_t fieldlen = strlen((char *)field);
 	unsigned char *data = NULL;
-	long datalen;
+	int64_t datalen;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
 	RL_CALL_VERBOSE(rl_hincrby, RL_OK, db, key, keylen, field, fieldlen, 10, &value);
@@ -376,11 +376,11 @@ TEST basic_test_hincrby_invalid(int _commit)
 
 	rlite *db = NULL;
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *field = UNSIGN("my field");
-	long fieldlen = strlen((char *)field);
+	int64_t fieldlen = strlen((char *)field);
 	unsigned char *data = UNSIGN("my data");
-	long datalen = strlen((char *)data);
+	int64_t datalen = strlen((char *)data);
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
 	RL_CALL_VERBOSE(rl_hset, RL_OK, db, key, keylen, field, fieldlen, data, datalen, NULL, 0);
@@ -399,13 +399,13 @@ TEST basic_test_hincrby_overflow(int _commit)
 
 	rlite *db = NULL;
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *field = UNSIGN("my field");
-	long fieldlen = strlen((char *)field);
+	int64_t fieldlen = strlen((char *)field);
 	unsigned char *data = UNSIGN("-9223372036854775484");
-	long datalen = strlen((char *)data);
+	int64_t datalen = strlen((char *)data);
 	unsigned char *data2;
-	long data2len;
+	int64_t data2len;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
 	RL_CALL_VERBOSE(rl_hset, RL_OK, db, key, keylen, field, fieldlen, data, datalen, NULL, 0);
@@ -432,11 +432,11 @@ TEST basic_test_hincrbyfloat_hget(int _commit)
 
 	rlite *db = NULL;
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *field = UNSIGN("my field");
-	long fieldlen = strlen((char *)field);
+	int64_t fieldlen = strlen((char *)field);
 	unsigned char *data = NULL;
-	long i, datalen;
+	int64_t i, datalen;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
 	RL_CALL_VERBOSE(rl_hincrbyfloat, RL_OK, db, key, keylen, field, fieldlen, 10.5, &value);
@@ -476,11 +476,11 @@ TEST basic_test_hincrbyfloat_invalid(int _commit)
 
 	rlite *db = NULL;
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *field = UNSIGN("my field");
-	long fieldlen = strlen((char *)field);
+	int64_t fieldlen = strlen((char *)field);
 	unsigned char *data = UNSIGN("my data");
-	long datalen = strlen((char *)data);
+	int64_t datalen = strlen((char *)data);
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
 	RL_CALL_VERBOSE(rl_hset, RL_OK, db, key, keylen, field, fieldlen, data, datalen, NULL, 0);
@@ -499,11 +499,11 @@ TEST basic_test_hset_del(int _commit)
 
 	rlite *db = NULL;
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *field = UNSIGN("my field");
-	long fieldlen = strlen((char *)field);
+	int64_t fieldlen = strlen((char *)field);
 	unsigned char *data = UNSIGN("my data");
-	long datalen = strlen((char *)data);
+	int64_t datalen = strlen((char *)data);
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
 	RL_CALL_VERBOSE(rl_hset, RL_OK, db, key, keylen, field, fieldlen, data, datalen, NULL, 0);
@@ -525,11 +525,11 @@ TEST hiterator_destroy()
 
 	rlite *db = NULL;
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *field = UNSIGN("my field");
-	long fieldlen = strlen((char *)field);
+	int64_t fieldlen = strlen((char *)field);
 	unsigned char *data = UNSIGN("my data");
-	long datalen = strlen((char *)data);
+	int64_t datalen = strlen((char *)data);
 	rl_hash_iterator *iterator;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, 0, 1);
 

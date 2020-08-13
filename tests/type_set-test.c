@@ -16,14 +16,14 @@ TEST basic_test_sadd_sismember(int _commit)
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *data = UNSIGN("my data");
-	long datalen = strlen((char *)data);
+	int64_t datalen = strlen((char *)data);
 	unsigned char *data2 = UNSIGN("other data2");
-	long data2len = strlen((char *)data2);
+	int64_t data2len = strlen((char *)data2);
 	unsigned char *datas[2] = {data, data2};
-	long dataslen[2] = {datalen, data2len};
-	long count;
+	int64_t dataslen[2] = {datalen, data2len};
+	int64_t count;
 
 	RL_CALL_VERBOSE(rl_sadd, RL_OK, db, key, keylen, 2, datas, dataslen, &count);
 	RL_BALANCED();
@@ -44,14 +44,14 @@ TEST basic_test_sadd_scard(int _commit)
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *data = UNSIGN("my data");
-	long datalen = strlen((char *)data);
+	int64_t datalen = strlen((char *)data);
 	unsigned char *data2 = UNSIGN("other data2");
-	long data2len = strlen((char *)data2);
+	int64_t data2len = strlen((char *)data2);
 	unsigned char *datas[2] = {data, data2};
-	long dataslen[2] = {datalen, data2len};
-	long card;
+	int64_t dataslen[2] = {datalen, data2len};
+	int64_t card;
 
 	RL_CALL_VERBOSE(rl_sadd, RL_OK, db, key, keylen, 1, datas, dataslen, NULL);
 	RL_BALANCED();
@@ -76,14 +76,14 @@ TEST basic_test_sadd_srem(int _commit)
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *data = UNSIGN("my data");
-	long datalen = strlen((char *)data);
+	int64_t datalen = strlen((char *)data);
 	unsigned char *data2 = UNSIGN("other data2");
-	long data2len = strlen((char *)data2);
+	int64_t data2len = strlen((char *)data2);
 	unsigned char *datas[2] = {data, data2};
-	long dataslen[2] = {datalen, data2len};
-	long count;
+	int64_t dataslen[2] = {datalen, data2len};
+	int64_t count;
 
 	RL_CALL_VERBOSE(rl_sadd, RL_OK, db, key, keylen, 2, datas, dataslen, NULL);
 	RL_BALANCED();
@@ -109,15 +109,15 @@ TEST basic_test_sadd_spop(int _commit)
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *data = UNSIGN("my data");
-	long datalen = strlen((char *)data);
+	int64_t datalen = strlen((char *)data);
 	unsigned char *data2 = UNSIGN("other data2");
-	long data2len = strlen((char *)data2);
+	int64_t data2len = strlen((char *)data2);
 	unsigned char *datas[2] = {data, data2};
-	long dataslen[2] = {datalen, data2len};
+	int64_t dataslen[2] = {datalen, data2len};
 	unsigned char *datapop, *datapop2;
-	long datapoplen, datapoplen2;
+	int64_t datapoplen, datapoplen2;
 
 	RL_CALL_VERBOSE(rl_sadd, RL_OK, db, key, keylen, 2, datas, dataslen, NULL);
 	RL_BALANCED();
@@ -148,19 +148,19 @@ TEST basic_test_sadd_sdiff(int _commit)
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *key2 = UNSIGN("my key2");
-	long key2len = strlen((char *)key2);
+	int64_t key2len = strlen((char *)key2);
 	unsigned char *data = UNSIGN("my data");
-	long datalen = strlen((char *)data);
+	int64_t datalen = strlen((char *)data);
 	unsigned char *data2 = UNSIGN("other data2");
-	long data2len = strlen((char *)data2);
+	int64_t data2len = strlen((char *)data2);
 	unsigned char *keys[2] = {key, key2};
-	long keyslen[2] = {keylen, key2len};
+	int64_t keyslen[2] = {keylen, key2len};
 	unsigned char *datas[2] = {data, data2};
-	long dataslen[2] = {datalen, data2len};
+	int64_t dataslen[2] = {datalen, data2len};
 	unsigned char **datasdiff;
-	long *datasdifflen, datasc, i;
+	int64_t *datasdifflen, datasc, i;
 
 	RL_CALL_VERBOSE(rl_sadd, RL_OK, db, key, keylen, 2, datas, dataslen, NULL);
 	RL_BALANCED();
@@ -189,19 +189,19 @@ TEST basic_test_sadd_sdiff_nonexistent(int _commit)
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *key2 = UNSIGN("my key2");
-	long key2len = strlen((char *)key2);
+	int64_t key2len = strlen((char *)key2);
 	unsigned char *data = UNSIGN("my data");
-	long datalen = strlen((char *)data);
+	int64_t datalen = strlen((char *)data);
 	unsigned char *data2 = UNSIGN("other data2");
-	long data2len = strlen((char *)data2);
+	int64_t data2len = strlen((char *)data2);
 	unsigned char *keys[2] = {key, key2};
-	long keyslen[2] = {keylen, key2len};
+	int64_t keyslen[2] = {keylen, key2len};
 	unsigned char *datas[2] = {data, data2};
-	long dataslen[2] = {datalen, data2len};
+	int64_t dataslen[2] = {datalen, data2len};
 	unsigned char **datasdiff;
-	long *datasdifflen, datasc, i;
+	int64_t *datasdifflen, datasc, i;
 
 	RL_CALL_VERBOSE(rl_sadd, RL_OK, db, key, keylen, 2, datas, dataslen, NULL);
 	RL_BALANCED();
@@ -226,21 +226,21 @@ TEST basic_test_sadd_sdiffstore(int _commit)
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *target = UNSIGN("my target");
-	long targetlen = strlen((char *)target);
+	int64_t targetlen = strlen((char *)target);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *key2 = UNSIGN("my key2");
-	long key2len = strlen((char *)key2);
+	int64_t key2len = strlen((char *)key2);
 	unsigned char *data = UNSIGN("my data");
-	long datalen = strlen((char *)data);
+	int64_t datalen = strlen((char *)data);
 	unsigned char *data2 = UNSIGN("other data2");
-	long data2len = strlen((char *)data2);
+	int64_t data2len = strlen((char *)data2);
 	unsigned char *keys[2] = {key, key2};
-	long keyslen[2] = {keylen, key2len};
+	int64_t keyslen[2] = {keylen, key2len};
 	unsigned char *datas[2] = {data, data2};
-	long dataslen[2] = {datalen, data2len};
+	int64_t dataslen[2] = {datalen, data2len};
 	unsigned char *datapop;
-	long datapoplen, size;
+	int64_t datapoplen, size;
 
 	RL_CALL_VERBOSE(rl_sadd, RL_OK, db, key, keylen, 2, datas, dataslen, NULL);
 	RL_BALANCED();
@@ -266,19 +266,19 @@ TEST basic_test_sadd_sinter(int _commit)
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *key2 = UNSIGN("my key2");
-	long key2len = strlen((char *)key2);
+	int64_t key2len = strlen((char *)key2);
 	unsigned char *data = UNSIGN("my data");
-	long datalen = strlen((char *)data);
+	int64_t datalen = strlen((char *)data);
 	unsigned char *data2 = UNSIGN("other data2");
-	long data2len = strlen((char *)data2);
+	int64_t data2len = strlen((char *)data2);
 	unsigned char *keys[2] = {key, key2};
-	long keyslen[2] = {keylen, key2len};
+	int64_t keyslen[2] = {keylen, key2len};
 	unsigned char *datas[2] = {data, data2};
-	long dataslen[2] = {datalen, data2len};
+	int64_t dataslen[2] = {datalen, data2len};
 	unsigned char **datasdiff;
-	long *datasdifflen, datasc, i;
+	int64_t *datasdifflen, datasc, i;
 
 	RL_CALL_VERBOSE(rl_sadd, RL_OK, db, key, keylen, 2, datas, dataslen, NULL);
 	RL_BALANCED();
@@ -307,21 +307,21 @@ TEST basic_test_sadd_sinterstore(int _commit)
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *target = UNSIGN("my target");
-	long targetlen = strlen((char *)target);
+	int64_t targetlen = strlen((char *)target);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *key2 = UNSIGN("my key2");
-	long key2len = strlen((char *)key2);
+	int64_t key2len = strlen((char *)key2);
 	unsigned char *data = UNSIGN("my data");
-	long datalen = strlen((char *)data);
+	int64_t datalen = strlen((char *)data);
 	unsigned char *data2 = UNSIGN("other data2");
-	long data2len = strlen((char *)data2);
+	int64_t data2len = strlen((char *)data2);
 	unsigned char *keys[2] = {key, key2};
-	long keyslen[2] = {keylen, key2len};
+	int64_t keyslen[2] = {keylen, key2len};
 	unsigned char *datas[2] = {data, data2};
-	long dataslen[2] = {datalen, data2len};
+	int64_t dataslen[2] = {datalen, data2len};
 	unsigned char *datapop;
-	long datapoplen, size;
+	int64_t datapoplen, size;
 
 	RL_CALL_VERBOSE(rl_sadd, RL_OK, db, key, keylen, 2, datas, dataslen, NULL);
 	RL_CALL_VERBOSE(rl_sadd, RL_OK, db, key2, key2len, 1, datas, dataslen, NULL);
@@ -346,17 +346,17 @@ TEST basic_test_sadd_sunion(int _commit)
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *key2 = UNSIGN("my key2");
-	long key2len = strlen((char *)key2);
+	int64_t key2len = strlen((char *)key2);
 	unsigned char *datas[2] = {UNSIGN("my data"), UNSIGN("my data2")};
-	long dataslen[2] = {strlen((char *)datas[0]), strlen((char *)datas[1]) };
+	int64_t dataslen[2] = {strlen((char *)datas[0]), strlen((char *)datas[1]) };
 	unsigned char *datas2[3] = {UNSIGN("other data2"), UNSIGN("yet another data"), UNSIGN("my data")};
-	long datas2len[3] = {strlen((char *)datas2[0]), strlen((char *)datas2[1]), strlen((char *)datas2[2])};
+	int64_t datas2len[3] = {strlen((char *)datas2[0]), strlen((char *)datas2[1]), strlen((char *)datas2[2])};
 	unsigned char *keys[2] = {key, key2};
-	long keyslen[2] = {keylen, key2len};
+	int64_t keyslen[2] = {keylen, key2len};
 	unsigned char **datasunion;
-	long *datasunionlen, datasc, i;
+	int64_t *datasunionlen, datasc, i;
 
 	RL_CALL_VERBOSE(rl_sadd, RL_OK, db, key, keylen, 2, datas, dataslen, NULL);
 	RL_BALANCED();
@@ -389,20 +389,20 @@ TEST basic_test_sadd_sunionstore(int _commit)
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *key2 = UNSIGN("my key2");
-	long key2len = strlen((char *)key2);
+	int64_t key2len = strlen((char *)key2);
 	unsigned char *target = UNSIGN("my target");
-	long targetlen = strlen((char *)target);
+	int64_t targetlen = strlen((char *)target);
 	unsigned char *datas[2] = {UNSIGN("my data"), UNSIGN("my data2")};
-	long dataslen[2] = {strlen((char *)datas[0]), strlen((char *)datas[1]) };
+	int64_t dataslen[2] = {strlen((char *)datas[0]), strlen((char *)datas[1]) };
 	unsigned char *datas2[3] = {UNSIGN("other data2"), UNSIGN("yet another data"), UNSIGN("my data")};
-	long datas2len[3] = {strlen((char *)datas2[0]), strlen((char *)datas2[1]), strlen((char *)datas2[2])};
+	int64_t datas2len[3] = {strlen((char *)datas2[0]), strlen((char *)datas2[1]), strlen((char *)datas2[2])};
 	unsigned char *keys[2] = {key, key2};
-	long keyslen[2] = {keylen, key2len};
+	int64_t keyslen[2] = {keylen, key2len};
 	unsigned char **datasunion;
-	long *datasunionlen, datasc, i;
-	long added;
+	int64_t *datasunionlen, datasc, i;
+	int64_t added;
 
 	RL_CALL_VERBOSE(rl_sadd, RL_OK, db, key, keylen, 2, datas, dataslen, NULL);
 	RL_BALANCED();
@@ -448,10 +448,10 @@ TEST basic_test_sadd_sunionstore_empty(int _commit)
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *key2 = UNSIGN("my key2");
-	long key2len = strlen((char *)key2);
-	long added;
+	int64_t key2len = strlen((char *)key2);
+	int64_t added;
 
 	RL_CALL_VERBOSE(rl_sunionstore, RL_OK, db, key, keylen, 1, &key2, &key2len, &added);
 	RL_BALANCED();
@@ -470,15 +470,15 @@ TEST basic_test_sadd_smove(int _commit)
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *key2 = UNSIGN("my key2");
-	long key2len = strlen((char *)key2);
+	int64_t key2len = strlen((char *)key2);
 	unsigned char *data = UNSIGN("my data");
-	long datalen = strlen((char *)data);
+	int64_t datalen = strlen((char *)data);
 	unsigned char *data2 = UNSIGN("other data2");
-	long data2len = strlen((char *)data2);
+	int64_t data2len = strlen((char *)data2);
 	unsigned char *datas[2] = {data, data2};
-	long dataslen[2] = {datalen, data2len};
+	int64_t dataslen[2] = {datalen, data2len};
 
 	RL_CALL_VERBOSE(rl_sadd, RL_OK, db, key, keylen, 2, datas, dataslen, NULL);
 	RL_BALANCED();
@@ -512,15 +512,15 @@ TEST basic_test_sadd_smembers(int _commit)
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *data = UNSIGN("my data");
-	long datalen = strlen((char *)data);
+	int64_t datalen = strlen((char *)data);
 	unsigned char *data2 = UNSIGN("other data2");
-	long data2len = strlen((char *)data2);
+	int64_t data2len = strlen((char *)data2);
 	unsigned char *datas[2] = {data, data2};
-	long dataslen[2] = {datalen, data2len};
+	int64_t dataslen[2] = {datalen, data2len};
 	unsigned char *testdata;
-	long testdatalen;
+	int64_t testdatalen;
 	int i;
 	rl_set_iterator *iterator;
 
@@ -545,9 +545,9 @@ TEST basic_test_sadd_smembers(int _commit)
 	PASS();
 }
 
-static long indexOf(long size, unsigned char **elements, long *elementslen, unsigned char *element, long elementlen)
+static int64_t indexOf(int64_t size, unsigned char **elements, int64_t *elementslen, unsigned char *element, int64_t elementlen)
 {
-	long i;
+	int64_t i;
 	for (i = 0; i < size; i++) {
 		if (elementslen[i] == elementlen && memcmp(elements[i], element, elementlen) == 0) {
 			return i;
@@ -556,15 +556,15 @@ static long indexOf(long size, unsigned char **elements, long *elementslen, unsi
 	return -1;
 }
 
-TEST fuzzy_test_srandmembers_unique(long size, int _commit)
+TEST fuzzy_test_srandmembers_unique(int64_t size, int _commit)
 {
 	int retval;
 
 	unsigned char **elements = malloc(sizeof(unsigned char *) * size);
-	long *elementslen = malloc(sizeof(long) * size);
+	int64_t *elementslen = malloc(sizeof(int64_t) * size);
 	int *results = malloc(sizeof(int) * size);
 
-	long i, j;
+	int64_t i, j;
 	for (i = 0; i < size; i++) {
 		elementslen[i] = ((float)rand() / RAND_MAX) * 10 + 5;
 		elements[i] = malloc(sizeof(unsigned char) * elementslen[i]);
@@ -577,16 +577,16 @@ TEST fuzzy_test_srandmembers_unique(long size, int _commit)
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 
-	long added;
+	int64_t added;
 	RL_CALL_VERBOSE(rl_sadd, RL_OK, db, key, keylen, size, elements, elementslen, &added);
 	EXPECT_LONG(added, size);
 	RL_BALANCED();
 
-	long memberc = 1;
+	int64_t memberc = 1;
 	unsigned char **members = NULL;
-	long *memberslen = NULL;
+	int64_t *memberslen = NULL;
 	RL_CALL_VERBOSE(rl_srandmembers, RL_OK, db, key, keylen, 0, &memberc, &members, &memberslen);
 	for (i = 0; i < memberc; i++) {
 		if (indexOf(size, elements, elementslen, members[i], memberslen[i]) == -1) {

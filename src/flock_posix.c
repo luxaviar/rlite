@@ -1,13 +1,16 @@
-#include <sys/fcntl.h>
-#include <sys/file.h>
-#include <sys/time.h>
-#include <unistd.h>
+#include "rlite/port/fcntl.h"
+#include "rlite/port/file.h"
+#include "rlite/port/time.h"
+#include "rlite/port/unistd.h"
 #include <errno.h>
 
 #include "rlite/rlite.h"
 
 int rl_flock(FILE *fp, int type)
 {
+#ifdef  _WIN32
+	return RL_OK;
+#else
 	int fd = fileno(fp);
 	int locktype;
 	if (type == RLITE_FLOCK_SH) {
@@ -27,10 +30,14 @@ int rl_flock(FILE *fp, int type)
 	} else {
 		return RL_UNEXPECTED;
 	}
+#endif //  _WIN32
 }
 
 int rl_is_flocked(const char *path, int type)
 {
+#ifdef _WIN32
+	return RL_NOT_FOUND;
+#else
 	int retval, oflags = O_NONBLOCK;
 	int locktype;
 
@@ -82,4 +89,5 @@ int rl_is_flocked(const char *path, int type)
 cleanup:
 	close(fd);
 	return retval;
+#endif
 }

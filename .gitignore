@@ -15,3 +15,6 @@ deps/lua/src/luac
 deps/lua/src/lua
 *.rld
 .*.rld.wal
+.vs
+x64
+*.db

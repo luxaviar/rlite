@@ -29,6 +29,11 @@ A million repetitions of "a"
 #endif
 #include "rlite/sha1.h"
 
+#ifdef _WIN32
+#define u_int32_t uint32_t
+#endif
+
+
 #define rol(value, bits) (((value) << (bits)) | ((value) >> (32 - (bits))))
 
 /* blk0() and blk() perform the initial expand. */

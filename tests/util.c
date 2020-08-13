@@ -1,4 +1,5 @@
-#include <unistd.h>
+#include "rlite/port/unistd.h"
+#include "rlite/port/file.h"
 #include "../src/rlite/rlite.h"
 
 int setup_db(rlite **_db, int file, int del)

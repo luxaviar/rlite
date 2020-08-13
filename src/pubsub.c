@@ -34,7 +34,7 @@ static void generate_subscriber_id(rlite *db)
 	char str[60];
 	unsigned char digest[20];
 	memset(str, 0, 60);
-	snprintf(str, 60, "%llu", rl_mstime());
+	snprintf(str, 60, "%" PRIu64 "", rl_mstime());
 	snprintf(&str[40], 20, "%d", rand());
 	sha1((unsigned char *)str, 60, digest);
 	sha1_formatter(digest, &db->subscriber_id, NULL);
@@ -68,10 +68,10 @@ static char *get_signal_filename(rlite *db, char *subscriber_id)
 	return rl_get_filename_with_suffix(driver->filename, subscriber_id);
 }
 
-static int do_subscribe(rlite *db, int internal_db_to_subscriber, int internal_db_to_subscription, int subscriptionc, unsigned char **subscriptionv, long *subscriptionvlen)
+static int do_subscribe(rlite *db, int internal_db_to_subscriber, int internal_db_to_subscription, int subscriptionc, unsigned char **subscriptionv, int64_t *subscriptionvlen)
 {
 	int i, retval;
-	long identifierlen[1] = {40};
+	int64_t identifierlen[1] = {40};
 	ENSURE_SUBSCRIBER_ID(RL_UNEXPECTED);
 	RL_CALL(rl_select_internal, RL_OK, db, internal_db_to_subscriber);
 	for (i = 0; i < subscriptionc; i++) {
@@ -86,20 +86,20 @@ cleanup:
 	return retval;
 }
 
-int rl_subscribe(rlite *db, int channelc, unsigned char **channelv, long *channelvlen)
+int rl_subscribe(rlite *db, int channelc, unsigned char **channelv, int64_t *channelvlen)
 {
 	return do_subscribe(db, RLITE_INTERNAL_DB_CHANNEL_SUBSCRIBERS, RLITE_INTERNAL_DB_SUBSCRIBER_CHANNELS, channelc, channelv, channelvlen);
 }
 
-int rl_psubscribe(rlite *db, int patternc, unsigned char **patternv, long *patternvlen)
+int rl_psubscribe(rlite *db, int patternc, unsigned char **patternv, int64_t *patternvlen)
 {
 	return do_subscribe(db, RLITE_INTERNAL_DB_PATTERN_SUBSCRIBERS, RLITE_INTERNAL_DB_SUBSCRIBER_PATTERNS, patternc, patternv, patternvlen);
 }
 
-static int do_unsubscribe(rlite *db, int internal_db_to_subscriber, int internal_db_to_subscription, int subscriptionc, unsigned char **subscriptionv, long *subscriptionvlen)
+static int do_unsubscribe(rlite *db, int internal_db_to_subscriber, int internal_db_to_subscription, int subscriptionc, unsigned char **subscriptionv, int64_t *subscriptionvlen)
 {
 	int i, retval;
-	long identifierlen[1] = {40};
+	int64_t identifierlen[1] = {40};
 	if (db->subscriber_id == NULL) {
 		// if there's no subscriber id, then the connection is not subscribed to anything
 		return RL_OK;
@@ -117,12 +117,12 @@ cleanup:
 	return retval;
 }
 
-int rl_unsubscribe(rlite *db, int channelc, unsigned char **channelv, long *channelvlen)
+int rl_unsubscribe(rlite *db, int channelc, unsigned char **channelv, int64_t *channelvlen)
 {
 	return do_unsubscribe(db, RLITE_INTERNAL_DB_CHANNEL_SUBSCRIBERS, RLITE_INTERNAL_DB_SUBSCRIBER_CHANNELS, channelc, channelv, channelvlen);
 }
 
-int rl_punsubscribe(rlite *db, int patternc, unsigned char **patternv, long *patternvlen)
+int rl_punsubscribe(rlite *db, int patternc, unsigned char **patternv, int64_t *patternvlen)
 {
 	return do_unsubscribe(db, RLITE_INTERNAL_DB_PATTERN_SUBSCRIBERS, RLITE_INTERNAL_DB_SUBSCRIBER_PATTERNS, patternc, patternv, patternvlen);
 }
@@ -133,11 +133,11 @@ static int rl_unsubscribe_all_type(rlite *db, char *subscriber_id, int internal_
 	rl_set_iterator *iterator;
 	int subscriptionc = 0;
 	unsigned char **subscriptionv = NULL, *subscription = NULL;
-	long *subscriptionvlen = NULL, subscriptionlen;
+	int64_t *subscriptionvlen = NULL, subscriptionlen;
 	RL_CALL(rl_select_internal, RL_OK, db, internal_db_to_subscription);
 	RL_CALL(rl_smembers, RL_OK, db, &iterator, (unsigned char *)subscriber_id, 40);
 	RL_MALLOC(subscriptionv, sizeof(char *) * iterator->size);
-	RL_MALLOC(subscriptionvlen, sizeof(long) * iterator->size);
+	RL_MALLOC(subscriptionvlen, sizeof(int64_t) * iterator->size);
 	subscriptionc = 0;
 	while ((retval = rl_set_iterator_next(iterator, NULL, &subscription, &subscriptionlen)) == RL_OK) {
 		subscriptionv[subscriptionc] = subscription;
@@ -198,7 +198,7 @@ int rl_unsubscribe_all(rlite *db)
 	return retval;
 }
 
-int rl_poll_wait(rlite *db, int *elementc, unsigned char ***_elements, long **_elementslen, struct timeval *timeout)
+int rl_poll_wait(rlite *db, int *elementc, unsigned char ***_elements, int64_t **_elementslen, struct timeval *timeout)
 {
 	int retval = rl_poll(db, elementc, _elements, _elementslen);
 	if (retval == RL_NOT_FOUND) {
@@ -216,13 +216,13 @@ int rl_poll_wait(rlite *db, int *elementc, unsigned char ***_elements, long **_e
 	return retval;
 }
 
-int rl_poll(rlite *db, int *elementc, unsigned char ***_elements, long **_elementslen)
+int rl_poll(rlite *db, int *elementc, unsigned char ***_elements, int64_t **_elementslen)
 {
 	int retval;
 	unsigned char *len = NULL, i;
-	long lenlen;
+	int64_t lenlen;
 	unsigned char **elements = NULL;
-	long *elementslen = NULL;
+	int64_t *elementslen = NULL;
 	if (db->subscriber_id == NULL) {
 		retval = RL_NOT_FOUND;
 		goto cleanup;
@@ -238,7 +238,7 @@ int rl_poll(rlite *db, int *elementc, unsigned char ***_elements, long **_elemen
 
 	*elementc = len[0];
 	RL_MALLOC(elements, sizeof(unsigned char *) * len[0]);
-	RL_MALLOC(elementslen, sizeof(long) * len[0]);
+	RL_MALLOC(elementslen, sizeof(int64_t) * len[0]);
 	for (i = 0; i < len[0]; i++) {
 		RL_CALL(rl_pop, RL_OK, db, (unsigned char *)db->subscriber_id, 40, &elements[i], &elementslen[i], 1);
 	}
@@ -251,7 +251,7 @@ cleanup:
 	return retval;
 }
 
-static int do_publish(rlite *db, char *subscriber_id, long subscribed_idlen, int valuec, unsigned char *values[], long valueslen[])
+static int do_publish(rlite *db, char *subscriber_id, int64_t subscribed_idlen, int valuec, unsigned char *values[], int64_t valueslen[])
 {
 	int retval;
 	char *filename = NULL;
@@ -276,12 +276,12 @@ cleanup:
 	return retval;
 }
 
-static int publish_to_members(rlite *db, rl_set_iterator *iterator, int valuec, unsigned char *values[], long valueslen[], long *recipients)
+static int publish_to_members(rlite *db, rl_set_iterator *iterator, int valuec, unsigned char *values[], int64_t valueslen[], int64_t *recipients)
 {
 	int retval;
 	unsigned char *value = NULL;
 	void *tmp;
-	long valuelen;
+	int64_t valuelen;
 	RL_CALL(rl_select_internal, RL_OK, db, RLITE_INTERNAL_DB_SUBSCRIBER_MESSAGES);
 	while ((retval = rl_set_iterator_next(iterator, NULL, &value, &valuelen)) == RL_OK) {
 		RL_REALLOC(value, sizeof(unsigned char) * (valuelen + 1));
@@ -305,14 +305,14 @@ cleanup:
 	return retval;
 }
 
-int rl_publish(rlite *db, unsigned char *channel, size_t channellen, const char *data, size_t datalen, long *recipients)
+int rl_publish(rlite *db, unsigned char *channel, size_t channellen, const char *data, size_t datalen, int64_t *recipients)
 {
 	int retval;
-	long i, patternc = 0;
+	int64_t i, patternc = 0;
 	unsigned char **patternv = NULL;
-	long *patternvlen = NULL;
+	int64_t *patternvlen = NULL;
 	unsigned char *values[5];
-	long valueslen[5];
+	int64_t valueslen[5];
 	rl_set_iterator *iterator;
 	*recipients = 0;
 
@@ -321,7 +321,7 @@ int rl_publish(rlite *db, unsigned char *channel, size_t channellen, const char 
 	values[0] = &q;
 	valueslen[0] = 1;
 	values[1] = (unsigned char *)MESSAGE;
-	valueslen[1] = (long)strlen(MESSAGE);
+	valueslen[1] = (int64_t)strlen(MESSAGE);
 	values[2] = channel;
 	valueslen[2] = channellen;
 	values[3] = (unsigned char *)data;
@@ -337,7 +337,7 @@ int rl_publish(rlite *db, unsigned char *channel, size_t channellen, const char 
 	values[0] = &q;
 	valueslen[0] = 1;
 	values[1] = (unsigned char *)PMESSAGE;
-	valueslen[1] = (long)strlen(PMESSAGE);
+	valueslen[1] = (int64_t)strlen(PMESSAGE);
 	values[3] = channel;
 	valueslen[3] = channellen;
 	values[4] = (unsigned char *)data;
@@ -378,7 +378,7 @@ cleanup:
 	return retval;
 }
 
-int rl_pubsub_patterns(rlite *db, long *patternc, unsigned char ***patternv, long **patternvlen)
+int rl_pubsub_patterns(rlite *db, int64_t *patternc, unsigned char ***patternv, int64_t **patternvlen)
 {
 	int retval;
 	RL_CALL(rl_select_internal, RL_OK, db, RLITE_INTERNAL_DB_PATTERN_SUBSCRIBERS);
@@ -388,7 +388,7 @@ cleanup:
 	return retval;
 }
 
-int rl_pubsub_channels(rlite *db, unsigned char *pattern, long patternlen, long *channelc, unsigned char ***channelv, long **channelvlen)
+int rl_pubsub_channels(rlite *db, unsigned char *pattern, int64_t patternlen, int64_t *channelc, unsigned char ***channelv, int64_t **channelvlen)
 {
 	int retval;
 	RL_CALL(rl_select_internal, RL_OK, db, RLITE_INTERNAL_DB_CHANNEL_SUBSCRIBERS);
@@ -398,7 +398,7 @@ cleanup:
 	return retval;
 }
 
-int rl_pubsub_numsub(rlite *db, int channelc, unsigned char **channelv, long *channelvlen, long *numsub)
+int rl_pubsub_numsub(rlite *db, int channelc, unsigned char **channelv, int64_t *channelvlen, int64_t *numsub)
 {
 	int i, retval;
 	RL_CALL(rl_select_internal, RL_OK, db, RLITE_INTERNAL_DB_CHANNEL_SUBSCRIBERS);
@@ -412,7 +412,7 @@ cleanup:
 	return retval;
 }
 
-int rl_pubsub_numpat(rlite *db, long *numpat)
+int rl_pubsub_numpat(rlite *db, int64_t *numpat)
 {
 	int retval;
 	RL_CALL(rl_select_internal, RL_OK, db, RLITE_INTERNAL_DB_PATTERN_SUBSCRIBERS);
@@ -423,7 +423,7 @@ cleanup:
 	return retval;
 }
 
-int rl_pubsub_count_subscriptions(rlite *db, long *numsubscriptions)
+int rl_pubsub_count_subscriptions(rlite *db, int64_t *numsubscriptions)
 {
 	int retval;
 	if (!db->subscriber_id) {
@@ -431,7 +431,7 @@ int rl_pubsub_count_subscriptions(rlite *db, long *numsubscriptions)
 		retval = RL_OK;
 		goto cleanup;
 	}
-	long count = 0, count2 = 0;
+	int64_t count = 0, count2 = 0;
 	RL_CALL(rl_select_internal, RL_OK, db, RLITE_INTERNAL_DB_SUBSCRIBER_CHANNELS);
 	RL_CALL2(rl_scard, RL_OK, RL_NOT_FOUND, db, (unsigned char *)db->subscriber_id, 40, &count);
 	RL_CALL(rl_select_internal, RL_OK, db, RLITE_INTERNAL_DB_SUBSCRIBER_PATTERNS);

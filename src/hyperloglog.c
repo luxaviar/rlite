@@ -36,6 +36,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <math.h>
+#include <stdint.h>
 
 /* The Redis HyperLogLog implementation is based on the following ideas:
  *
@@ -339,11 +340,11 @@ size_t rl_hll_sparse_max_bytes = 3000;
  * 'p' is an array of unsigned bytes. */
 #define HLL_DENSE_GET_REGISTER(target,p,regnum) do { \
     uint8_t *_p = (uint8_t*) p; \
-    unsigned long _byte = regnum*HLL_BITS/8; \
-    unsigned long _fb = regnum*HLL_BITS&7; \
-    unsigned long _fb8 = 8 - _fb; \
-    unsigned long b0 = _p[_byte]; \
-    unsigned long b1 = _p[_byte+1]; \
+    uint64_t _byte = regnum*HLL_BITS/8; \
+    uint64_t _fb = regnum*HLL_BITS&7; \
+    uint64_t _fb8 = 8 - _fb; \
+    uint64_t b0 = _p[_byte]; \
+    uint64_t b1 = _p[_byte+1]; \
     target = ((b0 >> _fb) | (b1 << _fb8)) & HLL_REGISTER_MAX; \
 } while(0)
 
@@ -351,10 +352,10 @@ size_t rl_hll_sparse_max_bytes = 3000;
  * 'p' is an array of unsigned bytes. */
 #define HLL_DENSE_SET_REGISTER(p,regnum,val) do { \
     uint8_t *_p = (uint8_t*) p; \
-    unsigned long _byte = regnum*HLL_BITS/8; \
-    unsigned long _fb = regnum*HLL_BITS&7; \
-    unsigned long _fb8 = 8 - _fb; \
-    unsigned long _v = val; \
+    uint64_t _byte = regnum*HLL_BITS/8; \
+    uint64_t _fb = regnum*HLL_BITS&7; \
+    uint64_t _fb8 = 8 - _fb; \
+    uint64_t _v = val; \
     _p[_byte] &= ~(HLL_REGISTER_MAX << _fb); \
     _p[_byte] |= _v << _fb; \
     _p[_byte+1] &= ~(HLL_REGISTER_MAX >> _fb8); \
@@ -444,7 +445,7 @@ static uint64_t MurmurHash64A (const void * key, int len, unsigned int seed) {
 /* Given a string element to add to the HyperLogLog, returns the length
  * of the pattern 000..1 of the element hash. As a side effect 'regp' is
  * set to the register index this element hashes to. */
-static int hllPatLen(unsigned char *ele, size_t elesize, long *regp) {
+static int hllPatLen(unsigned char *ele, size_t elesize, int64_t *regp) {
     uint64_t hash, bit, index;
     int count;
 
@@ -487,7 +488,7 @@ static int hllPatLen(unsigned char *ele, size_t elesize, long *regp) {
  * is returned. */
 static int hllDenseAdd(uint8_t *registers, unsigned char *ele, size_t elesize) {
     uint8_t oldcount, count;
-    long index;
+    int64_t index;
 
     /* Update the register if this element produced a longer run of zeroes. */
     count = hllPatLen(ele,elesize,&index);
@@ -513,7 +514,7 @@ static double hllDenseSum(uint8_t *registers, double *PE, int *ezp) {
      * we take a faster path with unrolled loops. */
     if (HLL_REGISTERS == 16384 && HLL_BITS == 6) {
         uint8_t *r = registers;
-        unsigned long r0, r1, r2, r3, r4, r5, r6, r7, r8, r9,
+        uint64_t r0, r1, r2, r3, r4, r5, r6, r7, r8, r9,
                       r10, r11, r12, r13, r14, r15;
         for (j = 0; j < 1024; j++) {
             /* Handle 16 registers per iteration. */
@@ -544,7 +545,7 @@ static double hllDenseSum(uint8_t *registers, double *PE, int *ezp) {
         }
     } else {
         for (j = 0; j < HLL_REGISTERS; j++) {
-            unsigned long reg;
+            uint64_t reg;
 
             HLL_DENSE_GET_REGISTER(reg,registers,j);
             if (reg == 0) {
@@ -568,7 +569,7 @@ static double hllDenseSum(uint8_t *registers, double *PE, int *ezp) {
  *
  * The function returns 0 if the sparse representation was valid,
  * otherwise 1 is returned if the representation was corrupted. */
-static int hllSparseToDense(unsigned char *sparse, long sparselen, unsigned char **newstr, long *newstrlen) {
+static int hllSparseToDense(unsigned char *sparse, int64_t sparselen, unsigned char **newstr, int64_t *newstrlen) {
     unsigned char *dense;
     struct hllhdr *hdr, *oldhdr = (struct hllhdr*)sparse;
     int idx = 0, runlen, regval;
@@ -639,12 +640,12 @@ static int hllSparseToDense(unsigned char *sparse, long sparselen, unsigned char
  * sparse to dense: this happens when a register requires to be set to a value
  * not representable with the sparse representation, or when the resulting
  * size would be greater than server.hll_sparse_max_bytes. */
-static int hllSparseAdd(unsigned char *str, long strlen, unsigned char *ele, size_t elesize, unsigned char **_str, long *_strlen) {
+static int hllSparseAdd(unsigned char *str, int64_t strlen, unsigned char *ele, size_t elesize, unsigned char **_str, int64_t *_strlen) {
     void *tmp;
     struct hllhdr *hdr;
     uint8_t oldcount, count, *sparse, *end, *p, *prev, *next;
-    long index, first, span;
-    long is_zero = 0, is_xzero = 0, is_val = 0, runlen = 0;
+    int64_t index, first, span;
+    int64_t is_zero = 0, is_xzero = 0, is_val = 0, runlen = 0;
 
     /* Update the register if this element produced a longer run of zeroes. */
     count = hllPatLen(ele,elesize,&index);
@@ -674,7 +675,7 @@ static int hllSparseAdd(unsigned char *str, long strlen, unsigned char *ele, siz
     next = NULL; /* Points to the next opcode at the end of the loop. */
     span = 0;
     while(p < end) {
-        long oplen;
+        int64_t oplen;
 
         /* Set span to the number of registers covered by this opcode.
          *
@@ -976,7 +977,7 @@ static double hllRawSum(uint8_t *registers, double *PE, int *ezp) {
  * is, hdr->registers will point to an uint8_t array of HLL_REGISTERS element.
  * This is useful in order to speedup PFCOUNT when called against multiple
  * keys (no need to work with 6-bit integers encoding). */
-static uint64_t hllCount(struct hllhdr *hdr, long strlen, int *invalid) {
+static uint64_t hllCount(struct hllhdr *hdr, int64_t strlen, int *invalid) {
     double m = HLL_REGISTERS;
     double E, alpha = 0.7213/(1+1.079/m);
     int j, ez; /* Number of registers equal to 0. */
@@ -1035,7 +1036,7 @@ static uint64_t hllCount(struct hllhdr *hdr, long strlen, int *invalid) {
 }
 
 /* Call hllDenseAdd() or hllSparseAdd() according to the HLL encoding. */
-static int hllAdd(unsigned char *str, long strlen, unsigned char *ele, size_t elesize, unsigned char **_str, long *_strlen) {
+static int hllAdd(unsigned char *str, int64_t strlen, unsigned char *ele, size_t elesize, unsigned char **_str, int64_t *_strlen) {
     *_str = str;
     *_strlen = strlen;
     struct hllhdr *hdr = (struct hllhdr *)str;
@@ -1054,7 +1055,7 @@ static int hllAdd(unsigned char *str, long strlen, unsigned char *ele, size_t el
  *
  * If the HyperLogLog is sparse and is found to be invalid, 1
  * is returned, otherwise the function always succeeds. */
-static int hllMerge(uint8_t *max, unsigned char *str, long strlen) {
+static int hllMerge(uint8_t *max, unsigned char *str, int64_t strlen) {
     struct hllhdr *hdr = (struct hllhdr *)str;
     int i;
 
@@ -1067,7 +1068,7 @@ static int hllMerge(uint8_t *max, unsigned char *str, long strlen) {
         }
     } else {
         uint8_t *p = (uint8_t *)hdr, *end = p + strlen;
-        long runlen, regval;
+        int64_t runlen, regval;
 
         p += HLL_HDR_SIZE;
         i = 0;
@@ -1099,7 +1100,7 @@ static int hllMerge(uint8_t *max, unsigned char *str, long strlen) {
 
 /* Create an HLL object. We always create the HLL using sparse encoding.
  * This will be upgraded to the dense representation as needed. */
-static int createHLLObject(unsigned char **_str, long *_strlen) {
+static int createHLLObject(unsigned char **_str, int64_t *_strlen) {
     struct hllhdr *hdr;
     unsigned char *s;
     uint8_t *p;
@@ -1133,7 +1134,7 @@ static int createHLLObject(unsigned char **_str, long *_strlen) {
 
 /* Check if the object is a String with a valid HLL representation.
  * Return 0 if this is true, otherwise return 1. */
-static int isHLLObject(unsigned char *str, long strlen) {
+static int isHLLObject(unsigned char *str, int64_t strlen) {
     struct hllhdr *hdr;
 
     if ((size_t)strlen < sizeof(*hdr)) goto invalid;
@@ -1157,7 +1158,7 @@ invalid:
 }
 
 /* PFADD var ele ele ele ... ele => :0 or :1 */
-int rl_str_pfadd(unsigned char *str, long strlen, int argc, unsigned char **argv, long *argvlen, unsigned char **_str, long *_strlen) {
+int rl_str_pfadd(unsigned char *str, int64_t strlen, int argc, unsigned char **argv, int64_t *argvlen, unsigned char **_str, int64_t *_strlen) {
     struct hllhdr *hdr;
     int updated = 0, j;
 
@@ -1193,7 +1194,7 @@ int rl_str_pfadd(unsigned char *str, long strlen, int argc, unsigned char **argv
 }
 
 /* PFCOUNT var -> approximated cardinality of set. */
-int rl_str_pfcount(int argc, unsigned char **argv, long *argvlen, long *_card, unsigned char **updatevalue, long *updatevaluelen) {
+int rl_str_pfcount(int argc, unsigned char **argv, int64_t *argvlen, int64_t *_card, unsigned char **updatevalue, int64_t *updatevaluelen) {
     struct hllhdr *hdr;
     uint64_t card;
 
@@ -1282,7 +1283,7 @@ int rl_str_pfcount(int argc, unsigned char **argv, long *argvlen, long *_card, u
     return 0;
 }
 
-int rl_str_pfmerge(int argc, unsigned char **argv, long *argvlen, unsigned char **_str, long *_strlen) {
+int rl_str_pfmerge(int argc, unsigned char **argv, int64_t *argvlen, unsigned char **_str, int64_t *_strlen) {
     uint8_t max[HLL_REGISTERS];
     struct hllhdr *hdr;
     int j;
@@ -1328,7 +1329,7 @@ int rl_str_pfmerge(int argc, unsigned char **argv, long *argvlen, unsigned char 
 #define HLL_TEST_CYCLES 1000
 int rl_str_pfselftest() {
     int retval;
-    long olen;
+    int64_t olen;
     unsigned int j, i;
     unsigned char *bitcounters = calloc(1, sizeof(unsigned char) * (HLL_DENSE_SIZE + 1));
     struct hllhdr *hdr = (struct hllhdr*) bitcounters, *hdr2;
@@ -1425,7 +1426,7 @@ cleanup:
     return retval;
 }
 
-int rl_str_pfdebug_getreg(unsigned char *str, long strlen, int *size, long **elements, unsigned char **_str, long *_strlen) {
+int rl_str_pfdebug_getreg(unsigned char *str, int64_t strlen, int *size, int64_t **elements, unsigned char **_str, int64_t *_strlen) {
     struct hllhdr *hdr;
     int j;
 
@@ -1440,7 +1441,7 @@ int rl_str_pfdebug_getreg(unsigned char *str, long strlen, int *size, long **ele
     hdr = (struct hllhdr *)str;
 
     *size = HLL_REGISTERS;
-    *elements = rl_malloc(sizeof(long) * HLL_REGISTERS);
+    *elements = rl_malloc(sizeof(int64_t) * HLL_REGISTERS);
     if (!*elements) {
         return -3;
     }
@@ -1448,7 +1449,7 @@ int rl_str_pfdebug_getreg(unsigned char *str, long strlen, int *size, long **ele
         uint8_t val;
 
         HLL_DENSE_GET_REGISTER(val,hdr->registers,j);
-        (*elements)[j] = (long)val;
+        (*elements)[j] = (int64_t)val;
     }
     *_str = str;
     *_strlen = strlen;
@@ -1468,7 +1469,7 @@ int rl_str_pfdebug_getreg(unsigned char *str, long strlen, int *size, long **ele
     memcpy(&obj[objlen], src, srclen);\
     objlen += srclen;
 
-int rl_str_pfdebug_decode(unsigned char *str, long strlen, unsigned char **response, long *responselen) {
+int rl_str_pfdebug_decode(unsigned char *str, int64_t strlen, unsigned char **response, int64_t *responselen) {
     struct hllhdr *hdr;
 
     if (isHLLObject(str, strlen) != 0) return -1;
@@ -1479,11 +1480,11 @@ int rl_str_pfdebug_decode(unsigned char *str, long strlen, unsigned char **respo
     }
 
     uint8_t *p = str, *end = p+strlen;
-    long decodedlen = 0;
-    long decodedall = strlen * 10;
+    int64_t decodedlen = 0;
+    int64_t decodedall = strlen * 10;
     unsigned char *decoded = rl_malloc(sizeof(unsigned char) * decodedall);
     char tmp[100];
-    long tmplen;
+    int64_t tmplen;
 
     p += HLL_HDR_SIZE;
     while(p < end) {
@@ -1514,7 +1515,7 @@ int rl_str_pfdebug_decode(unsigned char *str, long strlen, unsigned char **respo
     return 0;
 }
 
-int rl_str_pfdebug_encoding(unsigned char *str, long strlen, unsigned char **response, long *responselen) {
+int rl_str_pfdebug_encoding(unsigned char *str, int64_t strlen, unsigned char **response, int64_t *responselen) {
     struct hllhdr *hdr;
 
     if (isHLLObject(str, strlen) != 0) return -1;
@@ -1528,7 +1529,7 @@ int rl_str_pfdebug_encoding(unsigned char *str, long strlen, unsigned char **res
     return 0;
 }
 
-int rl_str_pfdebug_todense(unsigned char *str, long strlen, unsigned char **_str, long *_strlen) {
+int rl_str_pfdebug_todense(unsigned char *str, int64_t strlen, unsigned char **_str, int64_t *_strlen) {
     struct hllhdr *hdr;
 
     if (isHLLObject(str, strlen) != 0) return -1;

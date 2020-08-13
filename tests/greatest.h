@@ -283,7 +283,7 @@ typedef enum {
 
 /* If __VA_ARGS__ (C99) is supported, allow parametric testing
  * without needing to manually manage the argument struct. */
-#if __STDC_VERSION__ >= 19901L
+//#if __STDC_VERSION__ >= 19901L
 #define GREATEST_RUN_TESTp(TEST, ...)                                   \
     do {                                                                \
         if (greatest_pre_test(#TEST) == 1) {                            \
@@ -293,7 +293,7 @@ typedef enum {
             fprintf(GREATEST_STDOUT, "  %s\n", #TEST);                  \
         }                                                               \
     } while (0)
-#endif
+//#endif
 
 
 /* Check if the test runner is in verbose mode. */
@@ -428,7 +428,7 @@ typedef enum {
 
 #define GREATEST_CLOCK_DIFF(C1, C2)                                     \
     fprintf(GREATEST_STDOUT, " (%lu ticks, %.3f sec)",                  \
-        (long unsigned int) (C2) - (long unsigned int)(C1),             \
+        (uint64_t) (C2) - (uint64_t)(C1),             \
         (double)((C2) - (C1)) / (1.0 * (double)CLOCKS_PER_SEC))         \
 
 #if GREATEST_USE_LONGJMP
@@ -749,9 +749,9 @@ greatest_run_info greatest_info
 #define SET_TEARDOWN   GREATEST_SET_TEARDOWN_CB
 #define CHECK_CALL     GREATEST_CHECK_CALL
 
-#if __STDC_VERSION__ >= 19901L
+//#if __STDC_VERSION__ >= 19901L
 #define RUN_TESTp      GREATEST_RUN_TESTp
-#endif /* C99 */
+//#endif /* C99 */
 
 #if GREATEST_USE_LONGJMP
 #define ASSERT_OR_LONGJMP  GREATEST_ASSERT_OR_LONGJMP

@@ -4,14 +4,14 @@
 #include <math.h>
 #include "rlite/sha1.h"
 #ifdef RL_DEBUG
-#include <unistd.h>
+#include "rlite/port/unistd.h"
 #include <sys/stat.h>
 #include <execinfo.h>
 #include <valgrind/valgrind.h>
 #endif
 #include "rlite/status.h"
 #include "rlite/util.h"
-#include <sys/time.h>
+#include "rlite/port/time.h"
 
 int _sha1_formatter(unsigned char *data, char formatted[40])
 {
@@ -75,7 +75,7 @@ void rl_free(void *ptr)
 #endif
 
 
-void put_4bytes(unsigned char *p, long v)
+void put_4bytes(unsigned char *p, int64_t v)
 {
 	p[0] = (unsigned char)(v >> 24);
 	p[1] = (unsigned char)(v >> 16);
@@ -88,21 +88,21 @@ int get_4bytes(const unsigned char *p)
 	return (p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3];
 }
 
-unsigned long long get_8bytes(const unsigned char *p)
+uint64_t get_8bytes(const unsigned char *p)
 {
-	unsigned long long retval = 0;
-	retval |= (unsigned long long)p[0] << 56;
-	retval |= (unsigned long long)p[1] << 48;
-	retval |= (unsigned long long)p[2] << 40;
-	retval |= (unsigned long long)p[3] << 32;
-	retval |= (unsigned long long)p[4] << 24;
-	retval |= (unsigned long long)p[5] << 16;
-	retval |= (unsigned long long)p[6] << 8;
-	retval |= (unsigned long long)p[7];
+	uint64_t retval = 0;
+	retval |= (uint64_t)p[0] << 56;
+	retval |= (uint64_t)p[1] << 48;
+	retval |= (uint64_t)p[2] << 40;
+	retval |= (uint64_t)p[3] << 32;
+	retval |= (uint64_t)p[4] << 24;
+	retval |= (uint64_t)p[5] << 16;
+	retval |= (uint64_t)p[6] << 8;
+	retval |= (uint64_t)p[7];
 	return retval;
 }
 
-void put_8bytes(unsigned char *p, unsigned long long v)
+void put_8bytes(unsigned char *p, uint64_t v)
 {
 	p[0] = (unsigned char)(v >> 56);
 	p[1] = (unsigned char)(v >> 48);
@@ -116,7 +116,7 @@ void put_8bytes(unsigned char *p, unsigned long long v)
 
 int long_cmp(void *v1, void *v2)
 {
-	long a = *((long *)v1), b = *((long *)v2);
+	int64_t a = *((int64_t *)v1), b = *((int64_t *)v2);
 	if (a == b) {
 		return 0;
 	}
@@ -135,7 +135,7 @@ int long_formatter(void *v2, char **formatted, int *size)
 	if (*formatted == NULL) {
 		return RL_OUT_OF_MEMORY;
 	}
-	*size = snprintf(*formatted, 22, "%ld", *(long *)v2);
+	*size = snprintf(*formatted, 22, "%" PRId64 "", *(int64_t *)v2);
 	return RL_OK;
 }
 
@@ -165,11 +165,11 @@ int sha1_formatter(void *v2, char **formatted, int *size)
 #define unpack754_32(i) (unpack754((i), 32, 8))
 #define unpack754_64(i) (unpack754((i), 64, 11))
 
-unsigned long long pack754(long double f, unsigned bits, unsigned expbits)
+uint64_t pack754(double f, unsigned bits, unsigned expbits)
 {
-	long double fnorm;
+	double fnorm;
 	int shift;
-	long long sign, exp, significand;
+	int64_t sign, exp, significand;
 	unsigned significandbits = bits - expbits - 1; // -1 for sign bit
 
 	if (f == 0.0) {
@@ -219,10 +219,10 @@ unsigned long long pack754(long double f, unsigned bits, unsigned expbits)
 	return (sign << (bits - 1)) | (exp << (bits - expbits - 1)) | significand;
 }
 
-long double unpack754(unsigned long long i, unsigned bits, unsigned expbits)
+double unpack754(uint64_t i, unsigned bits, unsigned expbits)
 {
-	long double result;
-	long long shift;
+	double result;
+	int64_t shift;
 	unsigned bias;
 	unsigned significandbits = bits - expbits - 1; // -1 for sign bit
 
@@ -262,17 +262,17 @@ long double unpack754(unsigned long long i, unsigned bits, unsigned expbits)
 
 double get_double(const unsigned char *p)
 {
-	unsigned long long ull = get_8bytes(p);
+	uint64_t ull = get_8bytes(p);
 	return unpack754_64(ull);
 }
 
 void put_double(unsigned char *p, double v)
 {
-	unsigned long long ull = pack754_64(v);
+	uint64_t ull = pack754_64(v);
 	put_8bytes(p, ull);
 }
 
-int sha1(const unsigned char *data, long datalen, unsigned char digest[20])
+int sha1(const unsigned char *data, int64_t datalen, unsigned char digest[20])
 {
 	SHA1_CTX sha;
 	SHA1Init(&sha);
@@ -281,14 +281,14 @@ int sha1(const unsigned char *data, long datalen, unsigned char digest[20])
 	return RL_OK;
 }
 
-unsigned long long rl_mstime()
+uint64_t rl_mstime()
 {
 	struct timeval tp;
 	gettimeofday(&tp, NULL);
 	return tp.tv_sec * 1000 + tp.tv_usec / 1000;
 }
 
-double rl_strtod(unsigned char *_str, long strlen, unsigned char **_eptr) {
+double rl_strtod(unsigned char *_str, int64_t strlen, unsigned char **_eptr) {
 	double d;
 	char str[40];
 	char *eptr;
@@ -324,3 +324,37 @@ char *rl_get_filename_with_suffix(const char *filename, char *suffix) {
 cleanup:
 	return new_path;
 }
+
+#ifdef _WIN32
+#include <time.h>
+#include <winsock2.h>
+#include <Windows.h>
+
+int gettimeofday(struct timeval* tv, struct timezone* tz)
+{
+    if (tv) {
+        FILETIME               filetime; /* 64-bit value representing the number of 100-nanosecond intervals since January 1, 1601 00:00 UTC */
+        ULARGE_INTEGER         x;
+        ULONGLONG              usec;
+        static const ULONGLONG epoch_offset_us = 11644473600000000ULL; /* microseconds betweeen Jan 1,1601 and Jan 1,1970 */
+
+#if _WIN32_WINNT >= _WIN32_WINNT_WIN8
+        GetSystemTimePreciseAsFileTime(&filetime);
+#else
+        GetSystemTimeAsFileTime(&filetime);
+#endif
+        x.LowPart = filetime.dwLowDateTime;
+        x.HighPart = filetime.dwHighDateTime;
+        usec = x.QuadPart / 10 - epoch_offset_us;
+        tv->tv_sec = (time_t)(usec / 1000000ULL);
+        tv->tv_usec = (int64_t)(usec % 1000000ULL);
+    }
+    if (tz) {
+        TIME_ZONE_INFORMATION timezone;
+        GetTimeZoneInformation(&timezone);
+        tz->tz_minuteswest = timezone.Bias;
+        tz->tz_dsttime = 0;
+    }
+    return 0;
+}
+#endif

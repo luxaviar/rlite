@@ -1,4 +1,4 @@
-#include <arpa/inet.h>
+#include "rlite/port/inet.h"
 #include "rlite/page_key.h"
 #include "rlite/rlite.h"
 #include "rlite/util.h"
@@ -8,10 +8,10 @@
 
 struct stringwithlength {
 	unsigned char *string;
-	long stringlen;
+	int64_t stringlen;
 };
 
-int ucread(struct rl_restore_streamer *streamer, unsigned char *str, long len) {
+int ucread(struct rl_restore_streamer *streamer, unsigned char *str, int64_t len) {
 	struct stringwithlength *data = streamer->context;
 	if (len > data->stringlen) {
 		return RL_UNEXPECTED;
@@ -24,7 +24,7 @@ int ucread(struct rl_restore_streamer *streamer, unsigned char *str, long len) {
 	return RL_OK;
 }
 
-static rl_restore_streamer* init_string_streamer(unsigned char *data, long datalen)
+static rl_restore_streamer* init_string_streamer(unsigned char *data, int64_t datalen)
 {
 	int retval;
 	rl_restore_streamer *streamer;
@@ -47,11 +47,11 @@ static void free_string_streamer(rl_restore_streamer *streamer) {
 	rl_free(streamer);
 }
 
-static int read(rl_restore_streamer *streamer, unsigned char *target, long len) {
+static int read(rl_restore_streamer *streamer, unsigned char *target, int64_t len) {
 	return streamer->read(streamer, target, len);
 }
 
-static int verify(unsigned char *data, long datalen) {
+static int verify(unsigned char *data, int64_t datalen) {
 	unsigned char *footer;
 	uint16_t rdbver;
 	uint64_t crc;
@@ -70,13 +70,13 @@ static int verify(unsigned char *data, long datalen) {
 	return (memcmp(&crc,footer+2,8) == 0) ? RL_OK : RL_INVALID_PARAMETERS;
 }
 
-static int read_signed_int(unsigned char *data, long *value) {
-	*value = (long)data[0] | (long)(data[1] << 8) | (long)(data[2] << 16) | (long)(data[3] << 24);
+static int read_signed_int(unsigned char *data, int64_t *value) {
+	*value = (int64_t)data[0] | (int64_t)(data[1] << 8) | (int64_t)(data[2] << 16) | (int64_t)(data[3] << 24);
 	return RL_OK;
 }
 
-static int read_signed_long(unsigned char *data, long *value) {
-	long tmp;
+static int read_signed_long(unsigned char *data, int64_t *value) {
+	int64_t tmp;
 	*value = data[0] | (data[1] << 8) | (data[2] << 16) | (data[3] << 24);
 	tmp = data[4];
 	*value |= tmp << 32;
@@ -89,10 +89,10 @@ static int read_signed_long(unsigned char *data, long *value) {
 	return RL_OK;
 }
 
-static int read_unsigned_short(rl_restore_streamer *streamer, unsigned long *value) {
+static int read_unsigned_short(rl_restore_streamer *streamer, uint64_t *value) {
 	int retval;
 	unsigned char ucint;
-	long val;
+	int64_t val;
 	RL_CALL(read, RL_OK, streamer, &ucint, 1);
 	val = ucint;
 	RL_CALL(read, RL_OK, streamer, &ucint, 1);
@@ -102,27 +102,10 @@ cleanup:
 	return retval;
 }
 
-static int read_unsigned_int(rl_restore_streamer *streamer, unsigned long *value) {
+static int read_unsigned_int(rl_restore_streamer *streamer, uint64_t *value) {
 	int retval;
 	unsigned char ucint;
-	long val;
-	RL_CALL(read, RL_OK, streamer, &ucint, 1);
-	val = ucint;
-	RL_CALL(read, RL_OK, streamer, &ucint, 1);
-	val |= ucint << 8;
-	RL_CALL(read, RL_OK, streamer, &ucint, 1);
-	val |= ucint << 16;
-	RL_CALL(read, RL_OK, streamer, &ucint, 1);
-	val |= ucint << 24;
-	*value = val;
-cleanup:
-	return retval;
-}
-
-static int read_unsigned_long(rl_restore_streamer *streamer, unsigned long *value) {
-	int retval;
-	unsigned char ucint;
-	unsigned long val;
+	int64_t val;
 	RL_CALL(read, RL_OK, streamer, &ucint, 1);
 	val = ucint;
 	RL_CALL(read, RL_OK, streamer, &ucint, 1);
@@ -131,20 +114,37 @@ static int read_unsigned_long(rl_restore_streamer *streamer, unsigned long *valu
 	val |= ucint << 16;
 	RL_CALL(read, RL_OK, streamer, &ucint, 1);
 	val |= ucint << 24;
-	RL_CALL(read, RL_OK, streamer, &ucint, 1);
-	val |= (unsigned long)ucint << 32;
-	RL_CALL(read, RL_OK, streamer, &ucint, 1);
-	val |= (unsigned long)ucint << 40;
-	RL_CALL(read, RL_OK, streamer, &ucint, 1);
-	val |= (unsigned long)ucint << 48;
-	RL_CALL(read, RL_OK, streamer, &ucint, 1);
-	val |= (unsigned long)ucint << 56;
 	*value = val;
 cleanup:
 	return retval;
 }
 
-static int read_length_with_encoding(rl_restore_streamer *streamer, long *length, int *is_encoded)
+static int read_unsigned_long(rl_restore_streamer *streamer, uint64_t *value) {
+	int retval;
+	unsigned char ucint;
+	uint64_t val;
+	RL_CALL(read, RL_OK, streamer, &ucint, 1);
+	val = ucint;
+	RL_CALL(read, RL_OK, streamer, &ucint, 1);
+	val |= ucint << 8;
+	RL_CALL(read, RL_OK, streamer, &ucint, 1);
+	val |= ucint << 16;
+	RL_CALL(read, RL_OK, streamer, &ucint, 1);
+	val |= ucint << 24;
+	RL_CALL(read, RL_OK, streamer, &ucint, 1);
+	val |= (uint64_t)ucint << 32;
+	RL_CALL(read, RL_OK, streamer, &ucint, 1);
+	val |= (uint64_t)ucint << 40;
+	RL_CALL(read, RL_OK, streamer, &ucint, 1);
+	val |= (uint64_t)ucint << 48;
+	RL_CALL(read, RL_OK, streamer, &ucint, 1);
+	val |= (uint64_t)ucint << 56;
+	*value = val;
+cleanup:
+	return retval;
+}
+
+static int read_length_with_encoding(rl_restore_streamer *streamer, int64_t *length, int *is_encoded)
 {
 	int retval;
 	unsigned char f;
@@ -183,16 +183,16 @@ cleanup:
 	return retval;
 }
 
-static int read_ziplist_entry(rl_restore_streamer *streamer, unsigned long prev_length, unsigned char **_entry, long *_length)
+static int read_ziplist_entry(rl_restore_streamer *streamer, uint64_t prev_length, unsigned char **_entry, int64_t *_length)
 {
 	int retval = RL_OK;
-	long length = 0;
+	int64_t length = 0;
 	unsigned char *entry;
 	if (prev_length == 254) {
 		RL_CALL(read_unsigned_int, RL_OK, streamer, &prev_length)
 	}
 	unsigned char ucaux;
-	unsigned long entry_header;
+	uint64_t entry_header;
 	RL_CALL(read, RL_OK, streamer, &ucaux, 1);
 	entry_header = ucaux;
 	if ((entry_header >> 6) == 0) {
@@ -232,7 +232,7 @@ static int read_ziplist_entry(rl_restore_streamer *streamer, unsigned long prev_
 		length = ucaux;
 	} else if (entry_header >= 241 && entry_header <= 253) {
 		RL_MALLOC(entry, sizeof(unsigned char) * 2);
-		length = snprintf((char *)entry, 2, "%lu", entry_header - 241);
+		length = snprintf((char *)entry, 2, "%" PRIu64 "", entry_header - 241);
 		goto ret;
 	}
 	RL_MALLOC(entry, sizeof(unsigned char) * length);
@@ -244,10 +244,10 @@ cleanup:
 	return retval;
 }
 
-static int read_string(rl_restore_streamer *streamer, unsigned char **str, long *strlen)
+static int read_string(rl_restore_streamer *streamer, unsigned char **str, int64_t *strlen)
 {
 	int retval = RL_OK;
-	long length, strdatalen, cdatalen;
+	int64_t length, strdatalen, cdatalen;
 	unsigned char *strdata;
 	int is_encoded;
 	unsigned char ucint;
@@ -320,13 +320,13 @@ cleanup:
 	return retval;
 }
 
-int rl_restore_stream(struct rlite *db, const unsigned char *key, long keylen, unsigned long long expires, rl_restore_streamer *streamer) {
+int rl_restore_stream(struct rlite *db, const unsigned char *key, int64_t keylen, uint64_t expires, rl_restore_streamer *streamer) {
 	int retval;
 	unsigned char type, ucaux;
-	long i, length, length2;
+	int64_t i, length, length2;
 	unsigned char *strdata = NULL, *strdata2 = NULL, *strdata3 = NULL;
-	long strdatalen = 0, strdata2len, strdata3len;
-	unsigned long j, encoding, numentries, ulvalue;
+	int64_t strdatalen = 0, strdata2len, strdata3len;
+	uint64_t j, encoding, numentries, ulvalue;
 	void **tmp = NULL;
 	char f[40];
 	double d;
@@ -440,7 +440,7 @@ int rl_restore_stream(struct rlite *db, const unsigned char *key, long keylen, u
 			} else if (encoding == 2) {
 				RL_CALL(read_unsigned_short, RL_OK, substreamer, &ulvalue);
 			}
-			length2 = snprintf(f, 40, "%lu", ulvalue);
+			length2 = snprintf(f, 40, "%" PRIu64 "", ulvalue);
 			tmp[0] = f;
 			if (key) {
 				RL_CALL(rl_sadd, RL_OK, db, key, keylen, 1, (unsigned char **)tmp, &length2, NULL);
@@ -516,7 +516,7 @@ cleanup:
 	return retval;
 }
 
-int rl_restore(struct rlite *db, const unsigned char *key, long keylen, unsigned long long expires, unsigned char *data, long datalen)
+int rl_restore(struct rlite *db, const unsigned char *key, int64_t keylen, uint64_t expires, unsigned char *data, int64_t datalen)
 {
 	int retval;
 	rl_restore_streamer* streamer = NULL;

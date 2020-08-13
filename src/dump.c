@@ -1,15 +1,15 @@
-#include <arpa/inet.h>
+#include "rlite/port/inet.h"
 #include "rlite/rlite.h"
 #include "rlite/util.h"
 #include "rlite/crc64.h"
 #include "rlite/endianconv.h"
 
-static int rl_dump_string(struct rlite *db, const unsigned char *key, long keylen, unsigned char **data, long *datalen)
+static int rl_dump_string(struct rlite *db, const unsigned char *key, int64_t keylen, unsigned char **data, int64_t *datalen)
 {
 	int retval;
-	long valuelen;
+	int64_t valuelen;
 	unsigned char *buf = NULL;
-	long buflen;
+	int64_t buflen;
 	uint32_t length;
 
 	RL_CALL(rl_get, RL_OK, db, key, keylen, NULL, &valuelen);
@@ -31,21 +31,21 @@ cleanup:
 	return retval;
 }
 
-static int rl_dump_list(struct rlite *db, const unsigned char *key, long keylen, unsigned char **data, long *datalen)
+static int rl_dump_list(struct rlite *db, const unsigned char *key, int64_t keylen, unsigned char **data, int64_t *datalen)
 {
 	int retval;
 	unsigned char *buf = NULL;
-	long buflen;
+	int64_t buflen;
 	uint32_t length;
-	long valuelen = 0;
+	int64_t valuelen = 0;
 	rl_list_iterator *iterator = NULL;
 	void *tmp;
-	long page, size;
+	int64_t page, size;
 
 	RL_CALL(rl_lrange_iterator, RL_OK, db, key, keylen, 0, -1, &size, &iterator);
 	buflen = 16;
 	while ((retval = rl_list_iterator_next(iterator, &tmp)) == RL_OK) {
-		page = *(long *)tmp;
+		page = *(int64_t *)tmp;
 		rl_free(tmp);
 		RL_CALL(rl_multi_string_get, RL_OK, db, page, NULL, &valuelen);
 		buflen += 5 + valuelen;
@@ -65,7 +65,7 @@ static int rl_dump_list(struct rlite *db, const unsigned char *key, long keylen,
 
 	RL_CALL(rl_lrange_iterator, RL_OK, db, key, keylen, 0, -1, &size, &iterator);
 	while ((retval = rl_list_iterator_next(iterator, &tmp)) == RL_OK) {
-		page = *(long *)tmp;
+		page = *(int64_t *)tmp;
 		rl_free(tmp);
 		buf[buflen++] = (REDIS_RDB_32BITLEN << 6);
 		RL_CALL(rl_multi_string_get, RL_OK, db, page, NULL, &valuelen);
@@ -94,13 +94,13 @@ cleanup:
 	return retval;
 }
 
-static int rl_dump_set(struct rlite *db, const unsigned char *key, long keylen, unsigned char **data, long *datalen)
+static int rl_dump_set(struct rlite *db, const unsigned char *key, int64_t keylen, unsigned char **data, int64_t *datalen)
 {
 	int retval;
-	long valuelen;
+	int64_t valuelen;
 	unsigned char *buf = NULL;
-	long buflen;
-	long page;
+	int64_t buflen;
+	int64_t page;
 	uint32_t length;
 
 	rl_set_iterator *iterator = NULL;
@@ -150,12 +150,12 @@ cleanup:
 	return retval;
 }
 
-static int rl_dump_zset(struct rlite *db, const unsigned char *key, long keylen, unsigned char **data, long *datalen)
+static int rl_dump_zset(struct rlite *db, const unsigned char *key, int64_t keylen, unsigned char **data, int64_t *datalen)
 {
 	int retval;
-	long valuelen;
+	int64_t valuelen;
 	unsigned char *buf = NULL;
-	long buflen, page;
+	int64_t buflen, page;
 	uint32_t length;
 	double score;
 	char f[40];
@@ -212,14 +212,14 @@ cleanup:
 	return retval;
 }
 
-static int rl_dump_hash(struct rlite *db, const unsigned char *key, long keylen, unsigned char **data, long *datalen)
+static int rl_dump_hash(struct rlite *db, const unsigned char *key, int64_t keylen, unsigned char **data, int64_t *datalen)
 {
 	int retval;
-	long valuelen, value2len;
+	int64_t valuelen, value2len;
 	unsigned char *buf = NULL;
-	long buflen;
+	int64_t buflen;
 	uint32_t length;
-	long valuepage, value2page;
+	int64_t valuepage, value2page;
 
 	rl_hash_iterator *iterator = NULL;
 	RL_CALL(rl_hgetall, RL_OK, db, &iterator, key, keylen);
@@ -276,13 +276,13 @@ cleanup:
 	return retval;
 }
 
-int rl_dump(struct rlite *db, const unsigned char *key, long keylen, unsigned char **data, long *datalen)
+int rl_dump(struct rlite *db, const unsigned char *key, int64_t keylen, unsigned char **data, int64_t *datalen)
 {
 	int retval;
 	uint64_t crc;
 	unsigned char type;
 	unsigned char *buf = NULL;
-	long buflen;
+	int64_t buflen;
 
 	RL_CALL(rl_key_get, RL_FOUND, db, key, keylen, &type, NULL, NULL, NULL, NULL);
 	if (type == RL_TYPE_STRING) {

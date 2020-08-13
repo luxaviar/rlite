@@ -1,5 +1,5 @@
 #include <string.h>
-#include <unistd.h>
+#include "rlite/port/unistd.h"
 #include <pthread.h>
 #include "greatest.h"
 #include "rlite/hirlite.h"
@@ -14,7 +14,7 @@ static void *increment(void *UNUSED(arg)) {
 	size_t argvlen[100];
 	char* argv[100] = {"INCR", "key", NULL};
 	int argc = populateArgvlen(argv, argvlen);
-	long long val = 0;
+	int64_t val = 0;
 	do {
 		reply = rliteCommandArgv(context, argc, argv, argvlen);
 		if (reply->type != RLITE_REPLY_INTEGER || reply->integer < val) {
@@ -80,7 +80,7 @@ TEST threads_concurrency() {
 	size_t argvlen[100];
 	char* argv[100] = {"GET", "key", NULL};
 	int argc = populateArgvlen(argv, argvlen);
-	long long val;
+	int64_t val;
 	char tmp[40];
 
 	do {
@@ -117,7 +117,7 @@ TEST multiple_writing_threads_concurrency() {
 	size_t argvlen[100];
 	char* argv[100] = {"GET", "key", NULL};
 	int argc = populateArgvlen(argv, argvlen);
-	long long val;
+	int64_t val;
 	char tmp[40];
 
 	do {

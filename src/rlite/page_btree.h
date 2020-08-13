@@ -1,6 +1,8 @@
 #ifndef _RL_PAGE_BTREE_H
 #define _RL_PAGE_BTREE_H
 
+#include <stdint.h>
+
 #define rl_btree_nocache_destroy(db, btree) rl_btree_destroy(db, btree)
 #define rl_btree_node_nocache_destroy(db, node) rl_btree_node_destroy(db, node)
 
@@ -26,16 +28,16 @@ int sha1_formatter(void *v, char **str, int *size);
 #endif
 
 typedef struct rl_hashkey {
-	long string_page;
-	long value_page;
+	int64_t string_page;
+	int64_t value_page;
 } rl_hashkey;
 
 typedef struct rl_key {
 	unsigned char type;
-	long string_page;
-	long value_page;
-	unsigned long long expires;
-	long version;
+	int64_t string_page;
+	int64_t value_page;
+	uint64_t expires;
+	int64_t version;
 } rl_key;
 
 extern rl_btree_type rl_btree_type_hash_long_long;
@@ -48,41 +50,41 @@ typedef struct rl_btree_node {
 	void **scores;
 	// children is null when the node is a leaf
 	// when created, allocs size+1.
-	long *children;
+	int64_t *children;
 	void **values;
 	// size is the number of children used; allocs the maximum on creation
-	long size;
+	int64_t size;
 } rl_btree_node;
 
 typedef struct rl_btree {
 	struct rlite *db;
-	long max_node_size; // maximum number of scores in a node
-	long height;
+	int64_t max_node_size; // maximum number of scores in a node
+	int64_t height;
 	rl_btree_type *type;
-	long root;
-	long number_of_elements;
+	int64_t root;
+	int64_t number_of_elements;
 } rl_btree;
 
 typedef struct {
 	struct rlite *db;
 	rl_btree *btree;
-	long size;
-	long position;
+	int64_t size;
+	int64_t position;
 	struct rl_btree_iterator_nodes {
-		long position;
+		int64_t position;
 		rl_btree_node *node;
 	} nodes[];
 } rl_btree_iterator;
 
 void rl_btree_init();
-int rl_btree_create_size(struct rlite *db, rl_btree **btree, rl_btree_type *type, long max_node_size);
+int rl_btree_create_size(struct rlite *db, rl_btree **btree, rl_btree_type *type, int64_t max_node_size);
 int rl_btree_create(struct rlite *db, rl_btree **btree, rl_btree_type *type);
 int rl_btree_destroy(struct rlite *db, void *btree);
 int rl_btree_node_destroy(struct rlite *db, void *node);
-int rl_btree_add_element(struct rlite *db, rl_btree *btree, long btree_page, void *score, void *value);
+int rl_btree_add_element(struct rlite *db, rl_btree *btree, int64_t btree_page, void *score, void *value);
 int rl_btree_update_element(struct rlite *db, rl_btree *btree, void *score, void *value);
-int rl_btree_remove_element(struct rlite *db, rl_btree *btree, long btree_page, void *score);
-int rl_btree_find_score(struct rlite *db, rl_btree *btree, void *score, void **value, rl_btree_node **nodes, long *positions);
+int rl_btree_remove_element(struct rlite *db, rl_btree *btree, int64_t btree_page, void *score);
+int rl_btree_find_score(struct rlite *db, rl_btree *btree, void *score, void **value, rl_btree_node **nodes, int64_t *positions);
 /**
  * rl_btree_random_element
  *
@@ -99,7 +101,7 @@ int rl_btree_find_score(struct rlite *db, rl_btree *btree, void *score, void **v
 int rl_btree_random_element(struct rlite *db, rl_btree *btree, void **score, void **value);
 int rl_print_btree(struct rlite *db, rl_btree *btree);
 int rl_btree_is_balanced(struct rlite *db, rl_btree *btree);
-int rl_flatten_btree(struct rlite *db, rl_btree *btree, void *** scores, long *size);
+int rl_flatten_btree(struct rlite *db, rl_btree *btree, void *** scores, int64_t *size);
 
 int rl_btree_iterator_create(struct rlite *db, rl_btree *btree, rl_btree_iterator **iterator);
 int rl_btree_iterator_next(rl_btree_iterator *iterator, void **score, void **value);

@@ -35,6 +35,7 @@
  */
 
 #include "rlite/lzfP.h"
+#include <stdint.h>
 
 #define HSIZE (1 << (HLOG))
 
@@ -123,7 +124,7 @@ rl_lzf_compress (const void *const in_data, unsigned int in_len,
 #if defined (WIN32) && defined (_M_X64)
   unsigned _int64 off; /* workaround for missing POSIX compliance */
 #else
-  unsigned long off;
+  uint64_t off;
 #endif
   unsigned int hval;
   int lit;

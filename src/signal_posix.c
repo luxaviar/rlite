@@ -3,9 +3,9 @@
 #include <string.h>
 #include <stdio.h>
 #include <sys/types.h>
-#include <sys/select.h>
+#include "rlite/port/select.h"
 #include <sys/stat.h>
-#include <unistd.h>
+#include "rlite/port/unistd.h"
 #include "rlite/rlite.h"
 #include "rlite/util.h"
 #include "rlite/crc64.h"
@@ -15,7 +15,11 @@
 #define FIFO_HEADER_SIZE 12
 
 int rl_create_signal(const char *signal_name) {
+#ifdef _WIN32
+	return RL_UNEXPECTED;
+#else
 	return mkfifo(signal_name, 0777) == 0 ? RL_OK : RL_UNEXPECTED;
+#endif
 }
 
 int rl_delete_signal(const char *signal_name) {
@@ -25,6 +29,9 @@ int rl_delete_signal(const char *signal_name) {
 
 int rl_read_signal(const char *signal_name, struct timeval *timeout, char **_data, size_t *_datalen)
 {
+#ifdef _WIN32
+	return RL_UNEXPECTED;
+#else
 	char header[FIFO_HEADER_SIZE];
 	uint64_t crc;
 	size_t readbytes;
@@ -95,6 +102,7 @@ cleanup:
 		rl_free(data);
 	}
 	return retval;
+#endif
 }
 
 int rl_write_signal(const char *signal_name, const char *data, size_t datalen) {
@@ -105,7 +113,12 @@ int rl_write_signal(const char *signal_name, const char *data, size_t datalen) {
 	memrev64ifbe(&crc);
 	memcpy(&header[4], &crc, 8);
 
+#ifdef _WIN32
+	int fd = open(signal_name, O_WRONLY);
+#else
 	int fd = open(signal_name, O_WRONLY | O_NONBLOCK);
+#endif
+
 	if (fd == -1) {
 		// fifo may not always exist on our code
 		// it is a way to signal between processes, but it is fire and forget

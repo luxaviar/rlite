@@ -1,13 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-
+#include "rlite/port/unistd.h"
+#include "rlite/port/file.h"
 #include "rlite/rlite.h"
 #include "rlite/flock.h"
 #include "rlite/sha1.h"
 
 #ifdef RL_DEBUG
-int rl_search_cache(rlite *db, rl_data_type *type, long page_number, void **obj, long *position, void *context, rl_page **pages, long page_len);
+int rl_search_cache(rlite *db, rl_data_type *type, int64_t page_number, void **obj, int64_t *position, void *context, rl_page **pages, int64_t page_len);
 #endif
 
 static const char *identifier = "rlwal0.0";
@@ -69,8 +69,8 @@ static int rl_apply_wal_data(rlite *db, unsigned char *data, size_t datalen, int
 	int retval;
 	rl_file_driver *driver = db->driver;
 	size_t written, position = 28;
-	long page_number;
-	long i, write_pages_len = get_4bytes(&data[position]);
+	int64_t page_number;
+	int64_t i, write_pages_len = get_4bytes(&data[position]);
 	position += 4;
 	int readwrite = (driver->mode & RLITE_OPEN_READWRITE) != 0;
 	rl_page *page_obj;
@@ -190,7 +190,7 @@ cleanup:
 int rl_write_apply_wal(rlite *db) {
 	FILE *fp = NULL;
 	int retval = RL_OK;
-	long i, page_number;
+	int64_t i, page_number;
 	rl_page *page;
 	char *wal_path = NULL;
 	unsigned char *data = NULL;
@@ -205,10 +205,10 @@ int rl_write_apply_wal(rlite *db) {
 			goto cleanup;
 		}
 		if (memcmp(data, page->serialized_data, db->page_size) != 0) {
-			fprintf(stderr, "Read page %ld (%s) has changed\n", page->page_number, page->type->name);
+			fprintf(stderr, "Read page %" PRId64 " (%s) has changed\n", page->page_number, page->type->name);
 			for (i = 0; i < db->page_size; i++) {
 				if (page->serialized_data[i] != data[i]) {
-					fprintf(stderr, "Different data in position %ld (expected %d, got %d)\n", i, page->serialized_data[i], data[i]);
+					fprintf(stderr, "Different data in position %" PRId64 " (expected %d, got %d)\n", i, page->serialized_data[i], data[i]);
 				}
 			}
 			retval = rl_search_cache(db, page->type, page->page_number, NULL, NULL, NULL, db->write_pages, db->write_pages_len);

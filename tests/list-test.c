@@ -1,4 +1,4 @@
-#include <unistd.h>
+#include "rlite/port/unistd.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -12,18 +12,18 @@ TEST basic_insert_list_test(int options)
 	int retval;
 	rlite *db = NULL;
 	rl_list *list = NULL;
-	long **vals = malloc(sizeof(long *) * 7);
-	long *element;
+	int64_t **vals = malloc(sizeof(int64_t *) * 7);
+	int64_t *element;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, 0, 1);
 	db->number_of_databases = 1;
-	db->page_size = sizeof(long) * 2 + 12;
+	db->page_size = sizeof(int64_t) * 2 + 12;
 	RL_CALL_VERBOSE(rl_list_create, RL_OK, db, &list, &rl_list_type_long);
-	long list_page = db->next_empty_page;
+	int64_t list_page = db->next_empty_page;
 	RL_CALL_VERBOSE(rl_write, RL_OK, db, list->type->list_type, list_page, list);
 
-	long i, position;
+	int64_t i, position;
 	for (i = 0; i < 7; i++) {
-		vals[i] = malloc(sizeof(long));
+		vals[i] = malloc(sizeof(int64_t));
 		*vals[i] = i + 1;
 		switch(options) {
 			case 0:
@@ -55,7 +55,7 @@ TEST basic_insert_list_test(int options)
 		RL_CALL_VERBOSE(rl_list_get_element, RL_FOUND, db, list, (void **)&element, - 7 + i);
 		EXPECT_LONG(*element, *vals[(options % 2 == 0 ? i : (6 - i))]);
 	}
-	long nonexistent_vals[2] = {0, 8};
+	int64_t nonexistent_vals[2] = {0, 8};
 	for (i = 0; i < 2; i++) {
 		RL_CALL_VERBOSE(rl_list_find_element, RL_NOT_FOUND, db, list, &nonexistent_vals[i], NULL, NULL, NULL, NULL);
 	}
@@ -73,12 +73,12 @@ TEST basic_iterator_list_test(int _commit)
 	int retval;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	RL_CALL_VERBOSE(rl_list_create, RL_OK, db, &list, &rl_list_type_long);
-	long list_page = db->next_empty_page;
+	int64_t list_page = db->next_empty_page;
 	RL_CALL_VERBOSE(rl_write, RL_OK, db, list->type->list_type, list_page, list);
 
-	long i, *element;
+	int64_t i, *element;
 	for (i = 0; i < ITERATOR_SIZE; i++) {
-		element = malloc(sizeof(long));
+		element = malloc(sizeof(int64_t));
 		*element = i;
 		RL_CALL_VERBOSE(rl_list_add_element, RL_OK, db, list, list_page, element, -1);
 	}
@@ -94,9 +94,9 @@ TEST basic_iterator_list_test(int _commit)
 
 	i = 0;
 	void *tmp;
-	long val;
+	int64_t val;
 	while ((retval = rl_list_iterator_next(iterator, &tmp)) == RL_OK) {
-		val = *(long *)tmp;
+		val = *(int64_t *)tmp;
 		EXPECT_LONG(val, i);
 		rl_free(tmp);
 		i++;
@@ -112,9 +112,9 @@ TEST basic_iterator_list_test(int _commit)
 	PASS();
 }
 
-static int contains_element(long element, long *elements, long size)
+static int contains_element(int64_t element, int64_t *elements, int64_t size)
 {
-	long i;
+	int64_t i;
 	for (i = 0; i < size; i++) {
 		if (elements[i] == element) {
 			return 1;
@@ -122,24 +122,24 @@ static int contains_element(long element, long *elements, long size)
 	}
 	return 0;
 }
-TEST fuzzy_list_test(long size, long list_node_size, int _commit)
+TEST fuzzy_list_test(int64_t size, int64_t list_node_size, int _commit)
 {
-	long *elements = malloc(sizeof(long) * size);
-	long *nonelements = malloc(sizeof(long) * size);
+	int64_t *elements = malloc(sizeof(int64_t) * size);
+	int64_t *nonelements = malloc(sizeof(int64_t) * size);
 	void **flatten_elements = malloc(sizeof(void *) * size);
 	rlite *db = NULL;
 	rl_list *list = NULL;
 	int retval;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	db->number_of_databases = 1;
-	db->page_size = sizeof(long) * list_node_size + 12;
+	db->page_size = sizeof(int64_t) * list_node_size + 12;
 	RL_CALL_VERBOSE(rl_list_create, RL_OK, db, &list, &rl_list_type_long);
-	long list_page = db->next_empty_page;
+	int64_t list_page = db->next_empty_page;
 	RL_CALL_VERBOSE(rl_write, RL_OK, db, list->type->list_type, list_page, list);
 
-	long i, element, *element_copy;
+	int64_t i, element, *element_copy;
 
-	long j, position;
+	int64_t j, position;
 	int positive;
 
 	for (i = 0; i < size; i++) {
@@ -154,18 +154,18 @@ TEST fuzzy_list_test(long size, long list_node_size, int _commit)
 		else {
 			position = rand() % (i + 1);
 			if (position != i) {
-				memmove(&elements[position + 1], &elements[position], sizeof(long) * (i - position));
+				memmove(&elements[position + 1], &elements[position], sizeof(int64_t) * (i - position));
 			}
 		}
 		elements[position] = element;
-		element_copy = malloc(sizeof(long));
+		element_copy = malloc(sizeof(int64_t));
 		*element_copy = element;
 		positive = rand() % 2;
 		RL_CALL_VERBOSE(rl_list_add_element, RL_OK, db, list, list_page, element_copy, positive ? position : (- i + position - 1));
 		RL_CALL_VERBOSE(rl_list_is_balanced, RL_OK, db, list);
 		rl_flatten_list(db, list, flatten_elements);
 		for (j = 0; j < list->size; j++) {
-			EXPECT_LONG(*(long *)flatten_elements[j], elements[j]);
+			EXPECT_LONG(*(int64_t *)flatten_elements[j], elements[j]);
 		}
 		if (_commit) {
 			RL_CALL_VERBOSE(rl_commit, RL_OK, db);
@@ -195,22 +195,22 @@ TEST fuzzy_list_test(long size, long list_node_size, int _commit)
 	PASS();
 }
 
-TEST basic_delete_list_test(long elements, long element_to_remove, char *name)
+TEST basic_delete_list_test(int64_t elements, int64_t element_to_remove, char *name)
 {
-	long **vals = malloc(sizeof(long *) * elements);
+	int64_t **vals = malloc(sizeof(int64_t *) * elements);
 	rlite *db = NULL;
 	rl_list *list = NULL;
 	int retval;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, 0, 1);
 	db->number_of_databases = 1;
-	db->page_size = sizeof(long) * 2 + 12;
+	db->page_size = sizeof(int64_t) * 2 + 12;
 	RL_CALL_VERBOSE(rl_list_create, RL_OK, db, &list, &rl_list_type_long);
-	long list_page = db->next_empty_page;
+	int64_t list_page = db->next_empty_page;
 	RL_CALL_VERBOSE(rl_write, RL_OK, db, list->type->list_type, list_page, list);
-	long pos_element_to_remove = element_to_remove >= 0 ? (element_to_remove) : (elements + element_to_remove);
-	long i, j;
+	int64_t pos_element_to_remove = element_to_remove >= 0 ? (element_to_remove) : (elements + element_to_remove);
+	int64_t i, j;
 	for (i = 0; i < elements; i++) {
-		vals[i] = malloc(sizeof(long));
+		vals[i] = malloc(sizeof(int64_t));
 		*vals[i] = i;
 		RL_CALL_VERBOSE(rl_list_add_element, RL_OK, db, list, list_page, vals[i], i);
 		RL_CALL_VERBOSE(rl_list_is_balanced, RL_OK, db, list);
@@ -226,7 +226,7 @@ TEST basic_delete_list_test(long elements, long element_to_remove, char *name)
 	RL_CALL_VERBOSE(rl_list_is_balanced, RL_OK, db, list);
 
 	int expected;
-	long element[1];
+	int64_t element[1];
 	for (j = 0; j < elements; j++) {
 		if (j == pos_element_to_remove) {
 			expected = RL_NOT_FOUND;
@@ -246,20 +246,20 @@ cleanup:
 	PASS();
 }
 
-TEST fuzzy_list_delete_test(long size, long list_node_size, int _commit)
+TEST fuzzy_list_delete_test(int64_t size, int64_t list_node_size, int _commit)
 {
 	rlite *db = NULL;
 	rl_list *list = NULL;
-	long *elements = malloc(sizeof(long) * size);
+	int64_t *elements = malloc(sizeof(int64_t) * size);
 	int retval;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	db->number_of_databases = 1;
-	db->page_size = sizeof(long) * list_node_size + 12;
+	db->page_size = sizeof(int64_t) * list_node_size + 12;
 	RL_CALL_VERBOSE(rl_list_create, RL_OK, db, &list, &rl_list_type_long);
-	long list_page = db->next_empty_page;
+	int64_t list_page = db->next_empty_page;
 	RL_CALL_VERBOSE(rl_write, RL_OK, db, list->type->list_type, list_page, list);
 
-	long i, element, *element_copy;
+	int64_t i, element, *element_copy;
 
 	for (i = 0; i < size; i++) {
 		element = rand();
@@ -269,7 +269,7 @@ TEST fuzzy_list_delete_test(long size, long list_node_size, int _commit)
 		}
 		else {
 			elements[i] = element;
-			element_copy = malloc(sizeof(long));
+			element_copy = malloc(sizeof(int64_t));
 			*element_copy = element;
 			RL_CALL_VERBOSE(rl_list_add_element, RL_OK, db, list, list_page, element_copy, -1);
 			RL_CALL_VERBOSE(rl_list_is_balanced, RL_OK, db, list);
@@ -298,7 +298,7 @@ TEST fuzzy_list_delete_test(long size, long list_node_size, int _commit)
 SUITE(list_test)
 {
 	int i, j, k;
-	long size, list_node_size;
+	int64_t size, list_node_size;
 	int commit;
 
 	for (i = 0; i < 4; i++) {
@@ -321,7 +321,7 @@ SUITE(list_test)
 		}
 	}
 
-	long delete_tests[DELETE_TESTS_COUNT][2] = {
+	int64_t delete_tests[DELETE_TESTS_COUNT][2] = {
 		{8, 7},
 		{8, -1},
 		{7, -1},

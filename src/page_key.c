@@ -40,7 +40,7 @@ rl_type types[TYPES_LENGTH] = {
 
 static int get_type(char identifier, rl_type **type)
 {
-	long i;
+	int64_t i;
 	for (i = 0; i < TYPES_LENGTH; i++) {
 		if (types[i].identifier == identifier) {
 			*type = &types[i];
@@ -50,7 +50,7 @@ static int get_type(char identifier, rl_type **type)
 	return RL_UNEXPECTED;
 }
 
-int rl_key_set(rlite *db, const unsigned char *key, long keylen, unsigned char type, long value_page, unsigned long long expires, long version)
+int rl_key_set(rlite *db, const unsigned char *key, int64_t keylen, unsigned char type, int64_t value_page, uint64_t expires, int64_t version)
 {
 	int retval;
 
@@ -82,7 +82,7 @@ cleanup:
 	return retval;
 }
 
-static int rl_key_get_hash_ignore_expire(struct rlite *db, unsigned char digest[20], unsigned char *type, long *string_page, long *value_page, unsigned long long *expires, long *version, int ignore_expire)
+static int rl_key_get_hash_ignore_expire(struct rlite *db, unsigned char digest[20], unsigned char *type, int64_t *string_page, int64_t *value_page, uint64_t *expires, int64_t *version, int ignore_expire)
 {
 	int retval;
 	rl_btree *btree;
@@ -118,7 +118,7 @@ cleanup:
 	return retval;
 }
 
-static int rl_key_get_ignore_expire(struct rlite *db, const unsigned char *key, long keylen, unsigned char *type, long *string_page, long *value_page, unsigned long long *expires, long *version, int ignore_expire)
+static int rl_key_get_ignore_expire(struct rlite *db, const unsigned char *key, int64_t keylen, unsigned char *type, int64_t *string_page, int64_t *value_page, uint64_t *expires, int64_t *version, int ignore_expire)
 {
 	unsigned char digest[20];
 	int retval;
@@ -137,7 +137,7 @@ cleanup:
 
 static int rl_key_sha_check_version(struct rlite *db, struct watched_key* key) {
 	int retval;
-	long version;
+	int64_t version;
 	// if the key has expired, the version is still valid, according to
 	// https://code.google.com/p/redis/issues/detail?id=270
 	// it seems to be relevant to redis being stateful and single process
@@ -167,7 +167,7 @@ cleanup:
 	return retval;
 }
 
-int rl_watch(struct rlite *db, struct watched_key** _watched_key, const unsigned char *key, long keylen) {
+int rl_watch(struct rlite *db, struct watched_key** _watched_key, const unsigned char *key, int64_t keylen) {
 	int retval;
 	struct watched_key* wkey = NULL;
 	RL_MALLOC(wkey, sizeof(struct watched_key));
@@ -188,16 +188,16 @@ cleanup:
 	return retval;
 }
 
-int rl_key_get(struct rlite *db, const unsigned char *key, long keylen, unsigned char *type, long *string_page, long *value_page, unsigned long long *expires, long *version)
+int rl_key_get(struct rlite *db, const unsigned char *key, int64_t keylen, unsigned char *type, int64_t *string_page, int64_t *value_page, uint64_t *expires, int64_t *version)
 {
 	return rl_key_get_ignore_expire(db, key, keylen, type, string_page, value_page, expires, version, 0);
 }
 
-int rl_key_get_or_create(struct rlite *db, const unsigned char *key, long keylen, unsigned char type, long *page, long *version)
+int rl_key_get_or_create(struct rlite *db, const unsigned char *key, int64_t keylen, unsigned char type, int64_t *page, int64_t *version)
 {
 	unsigned char existing_type;
 	int retval = rl_key_get(db, key, keylen, &existing_type, NULL, page, NULL, version);
-	long _version;
+	int64_t _version;
 	if (retval == RL_FOUND) {
 		if (existing_type != type) {
 			return RL_WRONG_TYPE;
@@ -216,7 +216,7 @@ cleanup:
 	return retval;
 }
 
-int rl_key_delete(struct rlite *db, const unsigned char *key, long keylen)
+int rl_key_delete(struct rlite *db, const unsigned char *key, int64_t keylen)
 {
 	int retval;
 	void *tmp;
@@ -245,18 +245,18 @@ cleanup:
 	return retval;
 }
 
-int rl_key_expires(struct rlite *db, const unsigned char *key, long keylen, unsigned long long expires)
+int rl_key_expires(struct rlite *db, const unsigned char *key, int64_t keylen, uint64_t expires)
 {
 	int retval;
 	unsigned char type;
-	long string_page, value_page, version;
+	int64_t string_page, value_page, version;
 	RL_CALL(rl_key_get, RL_FOUND, db, key, keylen, &type, &string_page, &value_page, NULL, &version);
 	RL_CALL(rl_key_set, RL_OK, db, key, keylen, type, value_page, expires, version + 1);
 cleanup:
 	return retval;
 }
 
-int rl_key_delete_value(struct rlite *db, unsigned char identifier, long value_page)
+int rl_key_delete_value(struct rlite *db, unsigned char identifier, int64_t value_page)
 {
 	int retval;
 	rl_type *type;
@@ -267,12 +267,12 @@ cleanup:
 	return retval;
 }
 
-int rl_key_delete_with_value(struct rlite *db, const unsigned char *key, long keylen)
+int rl_key_delete_with_value(struct rlite *db, const unsigned char *key, int64_t keylen)
 {
 	int retval;
 	unsigned char identifier;
-	long value_page;
-	unsigned long long expires;
+	int64_t value_page;
+	uint64_t expires;
 	RL_CALL(rl_key_get_ignore_expire, RL_FOUND, db, key, keylen, &identifier, NULL, &value_page, &expires, NULL, 1);
 	RL_CALL(rl_key_delete_value, RL_OK, db, identifier, value_page);
 	RL_CALL(rl_key_delete, RL_OK, db, key, keylen);

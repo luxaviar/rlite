@@ -274,7 +274,7 @@ TEST test_srandmember_10_non_unique() {
 	rliteContext *context = rliteConnect(":memory:", 0);
 	size_t argvlen[100];
 
-	long i;
+	int64_t i;
 	char *m1 = "mymember", *m2 = "member2";
 	sadd(context, "myset", m1);
 	sadd(context, "myset", m2);

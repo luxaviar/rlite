@@ -8,11 +8,11 @@
 
 #define UNSIGN(str) ((unsigned char *)(str))
 
-static int create(rlite *db, unsigned char *key, long keylen, int maxsize, int _commit, int left)
+static int create(rlite *db, unsigned char *key, int64_t keylen, int maxsize, int _commit, int left)
 {
 	int i;
 	int retval;
-	long valuelen = 2, size;
+	int64_t valuelen = 2, size;
 	unsigned char *value = malloc(sizeof(unsigned char) * 2);
 	value[1] = 0;
 	for (i = maxsize - 1; i >= 0; i--) {
@@ -36,9 +36,9 @@ TEST basic_test_lpush_llen(int maxsize, int _commit)
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	value[1] = 0;
-	long size;
+	int64_t size;
 	RL_CALL_VERBOSE(create, RL_OK, db, key, keylen, maxsize, _commit, 1);
 
 	RL_CALL_VERBOSE(rl_llen, RL_OK, db, key, keylen, &size);
@@ -57,9 +57,9 @@ TEST basic_test_lpush_lpop(int maxsize, int _commit)
 	unsigned char *value = malloc(sizeof(unsigned char) * 2);
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *testvalue;
-	long testvaluelen;
+	int64_t testvaluelen;
 	value[1] = 0;
 	int i;
 
@@ -87,9 +87,9 @@ TEST basic_test_rpush_lpop(int maxsize, int _commit)
 	unsigned char *value = malloc(sizeof(unsigned char) * 2);
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *testvalue;
-	long testvaluelen;
+	int64_t testvaluelen;
 	value[1] = 0;
 	int i;
 
@@ -118,9 +118,9 @@ TEST basic_test_lpush_rpop(int maxsize, int _commit)
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *testvalue;
-	long testvaluelen;
+	int64_t testvaluelen;
 	value[1] = 0;
 	int i;
 
@@ -148,9 +148,9 @@ TEST basic_test_lpush_lindex(int maxsize, int _commit)
 	unsigned char *value = malloc(sizeof(unsigned char) * 2);
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *testvalue;
-	long testvaluelen;
+	int64_t testvaluelen;
 	value[1] = 0;
 	int i;
 
@@ -177,13 +177,13 @@ TEST basic_test_lpush_linsert(int _commit)
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	// note that LPUSH reverses the order
 	unsigned char *values[3] = {UNSIGN("CC"), UNSIGN("BB"), UNSIGN("AA")};
-	long valueslen[3] = {2, 2, 2};
-	long size;
+	int64_t valueslen[3] = {2, 2, 2};
+	int64_t size;
 	unsigned char *testvalue;
-	long testvaluelen;
+	int64_t testvaluelen;
 
 	RL_CALL_VERBOSE(rl_push, RL_OK, db, key, keylen, 1, 1, 3, values, valueslen, NULL);
 	RL_BALANCED();
@@ -217,9 +217,9 @@ TEST basic_test_lpushx(int _commit)
 	unsigned char *value = malloc(sizeof(unsigned char) * 2);
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	value[1] = 0;
-	long size;
+	int64_t size;
 
 	RL_CALL_VERBOSE(rl_push, RL_NOT_FOUND, db, key, keylen, 0, 1, 1, &key, &keylen, NULL);
 	RL_CALL_VERBOSE(rl_llen, RL_NOT_FOUND, db, key, keylen, &size);
@@ -235,15 +235,15 @@ TEST basic_test_lpushx(int _commit)
 	PASS();
 }
 
-TEST test_lrange(rlite *db, unsigned char *key, long keylen, long start, long stop, long cstart, long cstop)
+TEST test_lrange(rlite *db, unsigned char *key, int64_t keylen, int64_t start, int64_t stop, int64_t cstart, int64_t cstop)
 {
 	unsigned char testvalue[2];
-	long testvaluelen = 2;
+	int64_t testvaluelen = 2;
 	testvalue[1] = 0;
 
-	long i, size = 0, *valueslen = NULL;
+	int64_t i, size = 0, *valueslen = NULL;
 	unsigned char **values = NULL;
-	long pos;
+	int64_t pos;
 	int retval;
 	RL_CALL_VERBOSE(rl_lrange, RL_OK, db, key, keylen, start, stop, &size, &values, &valueslen);
 	EXPECT_LONG(size, cstop - cstart);
@@ -270,7 +270,7 @@ TEST basic_test_lrange(int _commit)
 	unsigned char *value = malloc(sizeof(unsigned char) * 2);
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	value[1] = 0;
 
 	RL_CALL_VERBOSE(create, RL_OK, db, key, keylen, 10, _commit, 1);
@@ -292,17 +292,17 @@ TEST basic_test_lrem(int _commit)
 {
 	int retval;
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *value1 = UNSIGN("AA"), *value2 = UNSIGN("BB");
-	long valuelen = 2, deleted;
-	long size;
+	int64_t valuelen = 2, deleted;
+	int64_t size;
 	unsigned char **values;
-	long *valueslen;
+	int64_t *valueslen;
 
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
-	long i, times = 100;
+	int64_t i, times = 100;
 
 	for (i = 0; i < times; i++) {
 		RL_CALL_VERBOSE(rl_push, RL_OK, db, key, keylen, 1, 1, 1, &value2, &valuelen, NULL);
@@ -318,7 +318,7 @@ TEST basic_test_lrem(int _commit)
 #define TEST_VALUE(index, value)\
 	{\
 		unsigned char *testvalue;\
-		long testvaluelen;\
+		int64_t testvaluelen;\
 		RL_CALL_VERBOSE(rl_lindex, RL_OK, db, key, keylen, index, &testvalue, &testvaluelen);\
 		if (testvaluelen != (long)strlen((char *)value) || memcmp(testvalue, value, testvaluelen) != 0) {\
 			FAIL();\
@@ -362,9 +362,9 @@ TEST basic_test_lset(int maxsize, int _commit)
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
+	int64_t keylen = strlen((char *)key);
 	unsigned char *value = UNSIGN("my value"), *testvalue;
-	long valuelen = strlen((char *)value), testvaluelen;
+	int64_t valuelen = strlen((char *)value), testvaluelen;
 	RL_CALL_VERBOSE(create, RL_OK, db, key, keylen, maxsize, _commit, 1);
 
 	RL_CALL_VERBOSE(rl_lset, RL_INVALID_PARAMETERS, db, key, keylen, maxsize, value, valuelen);
@@ -384,10 +384,10 @@ TEST basic_test_ltrim(int _commit)
 {
 	int retval;
 	unsigned char *key = UNSIGN("my key");
-	long keylen = strlen((char *)key);
-	long i, size;
+	int64_t keylen = strlen((char *)key);
+	int64_t i, size;
 	unsigned char **values;
-	long *valueslen;
+	int64_t *valueslen;
 
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);

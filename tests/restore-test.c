@@ -12,7 +12,7 @@ static int test_int8()
 	int retval;
 	rlite *db = NULL;
 	unsigned char *key = UNSIGN("mykey"), *testvalue;
-	long keylen = 5, testvaluelen;
+	int64_t keylen = 5, testvaluelen;
 	RL_CALL_VERBOSE(rl_open, RL_OK, ":memory:", &db, RLITE_OPEN_READWRITE | RLITE_OPEN_CREATE);
 
 	RL_CALL_VERBOSE(rl_restore, RL_OK, db, key, keylen, 0, UNSIGN("\x00\xc0\x01\x06\x00\xb0\x95\x8f\x36$T-o"), 13);
@@ -29,7 +29,7 @@ static int test_int16()
 	int retval;
 	rlite *db = NULL;
 	unsigned char *key = UNSIGN("mykey"), *testvalue;
-	long keylen = 5, testvaluelen;
+	int64_t keylen = 5, testvaluelen;
 	RL_CALL_VERBOSE(rl_open, RL_OK, ":memory:", &db, RLITE_OPEN_READWRITE | RLITE_OPEN_CREATE);
 
 	RL_CALL_VERBOSE(rl_restore, RL_OK, db, key, keylen, 0, UNSIGN("\x00\xc1\x00\x01\x06\x00\x9c\xb3\xbb\x1cX\xe3lx"), 14);
@@ -46,7 +46,7 @@ static int test_int32()
 	int retval;
 	rlite *db = NULL;
 	unsigned char *key = UNSIGN("mykey"), *testvalue;
-	long keylen = 5, testvaluelen;
+	int64_t keylen = 5, testvaluelen;
 	RL_CALL_VERBOSE(rl_open, RL_OK, ":memory:", &db, RLITE_OPEN_READWRITE | RLITE_OPEN_CREATE);
 
 	RL_CALL_VERBOSE(rl_restore, RL_OK, db, key, keylen, 0, UNSIGN("\x00\xc2\x90_\x01\x00\x06\x00\x38\x42\x62\xcf\xcc\xf6\x40s"), 16);
@@ -63,7 +63,7 @@ static int test_uncompressedstring()
 	int retval;
 	rlite *db = NULL;
 	unsigned char *key = UNSIGN("mykey"), *testvalue;
-	long keylen = 5, testvaluelen;
+	int64_t keylen = 5, testvaluelen;
 	RL_CALL_VERBOSE(rl_open, RL_OK, ":memory:", &db, RLITE_OPEN_READWRITE | RLITE_OPEN_CREATE);
 
 	RL_CALL_VERBOSE(rl_restore, RL_OK, db, key, keylen, 0, UNSIGN("\x00\x0bHello World\x06\x00R\x85||k\x87\xe6\x43"), 23);
@@ -80,7 +80,7 @@ static int test_uncompressedstring2()
 	int retval;
 	rlite *db = NULL;
 	unsigned char *key = UNSIGN("mykey"), *testvalue;
-	long keylen = 5, testvaluelen;
+	int64_t keylen = 5, testvaluelen;
 	RL_CALL_VERBOSE(rl_open, RL_OK, ":memory:", &db, RLITE_OPEN_READWRITE | RLITE_OPEN_CREATE);
 
 	RL_CALL_VERBOSE(rl_restore, RL_OK, db, key, keylen, 0, UNSIGN("\x00\x80\x00\x00\x00\x03\x61sd\x06\x00\xa4\xed\x80\xcb:7\x89\xd7"), 19);
@@ -97,7 +97,7 @@ static int test_compressedstring()
 	int retval;
 	rlite *db = NULL;
 	unsigned char *key = UNSIGN("mykey"), *testvalue;
-	long keylen = 5, testvaluelen;
+	int64_t keylen = 5, testvaluelen;
 	RL_CALL_VERBOSE(rl_open, RL_OK, ":memory:", &db, RLITE_OPEN_READWRITE | RLITE_OPEN_CREATE);
 
 	RL_CALL_VERBOSE(rl_restore, RL_OK, db, key, keylen, 0, UNSIGN("\x00\xc3\x06\x15\x01\x61\x61\xe0\n\x00\x06\x00k\xe1\xdb\xe8\xf2\x14\x03\xfb"), 20);
@@ -114,10 +114,10 @@ static int test_list()
 	int retval;
 	rlite *db = NULL;
 	unsigned char *key = UNSIGN("mykey");
-	long keylen = 5;
-	long size;
+	int64_t keylen = 5;
+	int64_t size;
 	unsigned char **values;
-	long *valueslen;
+	int64_t *valueslen;
 
 	RL_CALL_VERBOSE(rl_open, RL_OK, ":memory:", &db, RLITE_OPEN_READWRITE | RLITE_OPEN_CREATE);
 
@@ -138,10 +138,10 @@ static int test_list2()
 	int retval;
 	rlite *db = NULL;
 	unsigned char *key = UNSIGN("mykey");
-	long keylen = 5;
-	long size;
+	int64_t keylen = 5;
+	int64_t size;
 	unsigned char **values;
-	long *valueslen;
+	int64_t *valueslen;
 
 	RL_CALL_VERBOSE(rl_open, RL_OK, ":memory:", &db, RLITE_OPEN_READWRITE | RLITE_OPEN_CREATE);
 
@@ -166,8 +166,8 @@ static int test_set()
 	int retval;
 	rlite *db = NULL;
 	unsigned char *key = UNSIGN("mykey");
-	long keylen = 5;
-	long size;
+	int64_t keylen = 5;
+	int64_t size;
 
 	RL_CALL_VERBOSE(rl_open, RL_OK, ":memory:", &db, RLITE_OPEN_READWRITE | RLITE_OPEN_CREATE);
 
@@ -186,8 +186,8 @@ static int test_zset()
 	int retval;
 	rlite *db = NULL;
 	unsigned char *key = UNSIGN("mykey");
-	long keylen = 5;
-	long size = 10;
+	int64_t keylen = 5;
+	int64_t size = 10;
 	double score;
 
 	RL_CALL_VERBOSE(rl_open, RL_OK, ":memory:", &db, RLITE_OPEN_READWRITE | RLITE_OPEN_CREATE);
@@ -207,8 +207,8 @@ static int test_hash()
 	int retval;
 	rlite *db = NULL;
 	unsigned char *key = UNSIGN("mykey"), *testvalue;
-	long keylen = 5;
-	long size = 10, testvaluelen = 0;
+	int64_t keylen = 5;
+	int64_t size = 10, testvaluelen = 0;
 
 	RL_CALL_VERBOSE(rl_open, RL_OK, ":memory:", &db, RLITE_OPEN_READWRITE | RLITE_OPEN_CREATE);
 
@@ -228,10 +228,10 @@ static int test_ziplist()
 	int retval;
 	rlite *db = NULL;
 	unsigned char *key = UNSIGN("mykey");
-	long keylen = 5;
-	long size = 10;
+	int64_t keylen = 5;
+	int64_t size = 10;
 	unsigned char **values = NULL;
-	long *valueslen = NULL;
+	int64_t *valueslen = NULL;
 
 	RL_CALL_VERBOSE(rl_open, RL_OK, ":memory:", &db, RLITE_OPEN_READWRITE | RLITE_OPEN_CREATE);
 	RL_CALL_VERBOSE(rl_restore, RL_OK, db, key, keylen, 0, UNSIGN("\n\x0f\x0f\x00\x00\x00\x0c\x00\x00\x00\x02\x00\x00\xf3\x02\xf2\xff\x06\x00\x8d#\x11n'Fl\x80"), 27);
@@ -254,8 +254,8 @@ static int test_intset()
 	int retval;
 	rlite *db = NULL;
 	unsigned char *key = UNSIGN("mykey");
-	long keylen = 5;
-	long size = 10;
+	int64_t keylen = 5;
+	int64_t size = 10;
 
 	RL_CALL_VERBOSE(rl_open, RL_OK, ":memory:", &db, RLITE_OPEN_READWRITE | RLITE_OPEN_CREATE);
 	RL_CALL_VERBOSE(rl_restore, RL_OK, db, key, keylen, 0, UNSIGN("\x0b\x0c\x02\x00\x00\x00\x02\x00\x00\x00\x01\x00\x02\x00\x06\x00\xf9\x94P1\xc1\xbe\x1c\xbd"), 24);
@@ -273,8 +273,8 @@ static int test_zsetziplist()
 	int retval;
 	rlite *db = NULL;
 	unsigned char *key = UNSIGN("mykey");
-	long keylen = 5;
-	long size = 10;
+	int64_t keylen = 5;
+	int64_t size = 10;
 	double score = 0.0;
 
 	RL_CALL_VERBOSE(rl_open, RL_OK, ":memory:", &db, RLITE_OPEN_READWRITE | RLITE_OPEN_CREATE);
@@ -295,10 +295,10 @@ static int test_hashziplist()
 	int retval;
 	rlite *db = NULL;
 	unsigned char *key = UNSIGN("mykey");
-	long keylen = 5;
-	long size = 10;
+	int64_t keylen = 5;
+	int64_t size = 10;
 	unsigned char *data;
-	long datalen;
+	int64_t datalen;
 
 	RL_CALL_VERBOSE(rl_open, RL_OK, ":memory:", &db, RLITE_OPEN_READWRITE | RLITE_OPEN_CREATE);
 	RL_CALL_VERBOSE(rl_restore, RL_OK, db, key, keylen, 0, UNSIGN("\r))\x00\x00\x00 \x00\x00\x00\x04\x00\x00\x05\x66ield\a\x05value\a\x06\x66ield2\b\x06value2\xff\x06\x00\x1b\xd0\x96\xcb\xa8\x90\xfb\x39"), 53);

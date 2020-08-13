@@ -1,0 +1,341 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="test">
+      <UniqueIdentifier>{ad333ec7-9bf0-4311-8b4b-6617613b4bac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\rlite">
+      <UniqueIdentifier>{a2a44318-1d75-4741-95ca-1852e51b8e10}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\rlite\port">
+      <UniqueIdentifier>{25813e2e-d8ca-4afd-898f-4622ee82dae2}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\rlite\constants.h">
+      <Filter>include\rlite</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rlite\crc64.h">
+      <Filter>include\rlite</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rlite\dump.h">
+      <Filter>include\rlite</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rlite\endianconv.h">
+      <Filter>include\rlite</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rlite\flock.h">
+      <Filter>include\rlite</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rlite\hirlite.h">
+      <Filter>include\rlite</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rlite\hyperloglog.h">
+      <Filter>include\rlite</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rlite\lzf.h">
+      <Filter>include\rlite</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rlite\lzfP.h">
+      <Filter>include\rlite</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rlite\page_btree.h">
+      <Filter>include\rlite</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rlite\page_key.h">
+      <Filter>include\rlite</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rlite\page_list.h">
+      <Filter>include\rlite</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rlite\page_long.h">
+      <Filter>include\rlite</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rlite\page_multi_string.h">
+      <Filter>include\rlite</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rlite\page_skiplist.h">
+      <Filter>include\rlite</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rlite\page_string.h">
+      <Filter>include\rlite</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rlite\pqsort.h">
+      <Filter>include\rlite</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rlite\pubsub.h">
+      <Filter>include\rlite</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rlite\rand.h">
+      <Filter>include\rlite</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rlite\restore.h">
+      <Filter>include\rlite</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rlite\rlite.h">
+      <Filter>include\rlite</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rlite\sha1.h">
+      <Filter>include\rlite</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rlite\signal.h">
+      <Filter>include\rlite</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rlite\solarisfixes.h">
+      <Filter>include\rlite</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rlite\sort.h">
+      <Filter>include\rlite</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rlite\status.h">
+      <Filter>include\rlite</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rlite\type_hash.h">
+      <Filter>include\rlite</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rlite\type_list.h">
+      <Filter>include\rlite</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rlite\type_set.h">
+      <Filter>include\rlite</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rlite\type_string.h">
+      <Filter>include\rlite</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rlite\type_zset.h">
+      <Filter>include\rlite</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rlite\util.h">
+      <Filter>include\rlite</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rlite\utilfromredis.h">
+      <Filter>include\rlite</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rlite\wal.h">
+      <Filter>include\rlite</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rlite\port\fcntl.h">
+      <Filter>include\rlite\port</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rlite\port\file.h">
+      <Filter>include\rlite\port</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rlite\port\inet.h">
+      <Filter>include\rlite\port</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rlite\port\select.h">
+      <Filter>include\rlite\port</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rlite\port\time.h">
+      <Filter>include\rlite\port</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rlite\port\unistd.h">
+      <Filter>include\rlite\port</Filter>
+    </ClInclude>
+    <ClInclude Include="tests\util.h">
+      <Filter>test</Filter>
+    </ClInclude>
+    <ClInclude Include="tests\greatest.h">
+      <Filter>test</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\crc64.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dump.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\flock_posix.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\hirlite.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\hyperloglog.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lzf_c.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lzf_d.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\page_btree.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\page_key.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\page_list.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\page_long.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\page_multi_string.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\page_skiplist.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\page_string.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\pqsort.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\pubsub.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\rand.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\restore.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\rlite.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sha1.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\signal_posix.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sort.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\type_hash.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\type_list.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\type_set.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\type_string.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\type_zset.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\util.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\utilfromredis.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\wal.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\zset-test.c">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\util.c">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\type_zset-test.c">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\type_string-test.c">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\type_set-test.c">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\type_list-test.c">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\type_hash-test.c">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\test.c">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\string-test.c">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\sort-test.c">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\skiplist-test.c">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\set-test.c">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\rlite-test.c">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\restore-test.c">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\parser-test.c">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\multi-test.c">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\multi_string-test.c">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\long-test.c">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\list-test.c">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\key-test.c">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\hyperloglog-test.c">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\hstring-test.c">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\hsort-test.c">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\hmulti-test.c">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\hlist-test.c">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\hash-test.c">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\echo-test.c">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\dump-test.c">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\db-test.c">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\btree-test.c">
+      <Filter>test</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="tests\Makefile">
+      <Filter>test</Filter>
+    </None>
+  </ItemGroup>
+</Project>

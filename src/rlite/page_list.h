@@ -21,18 +21,18 @@ typedef struct {
 extern rl_list_type rl_list_type_long;
 
 typedef struct rl_list_node {
-	long size;
-	long left;
-	long right;
+	int64_t size;
+	int64_t left;
+	int64_t right;
 	void **elements;
 } rl_list_node;
 
 typedef struct rl_list {
-	long max_node_size; // maximum number of elements in a node
-	long size;
+	int64_t max_node_size; // maximum number of elements in a node
+	int64_t size;
 	rl_list_type *type;
-	long left;
-	long right;
+	int64_t left;
+	int64_t right;
 } rl_list;
 
 typedef struct rl_list_iterator {
@@ -40,16 +40,16 @@ typedef struct rl_list_iterator {
 	rl_list *list;
 	rl_list_node *node;
 	int direction; // 1 for right, -1 for left
-	long node_position;
+	int64_t node_position;
 } rl_list_iterator;
 
 int rl_list_create(struct rlite *db, rl_list **_list, rl_list_type *type);
 int rl_list_destroy(struct rlite *db, void *list);
 int rl_list_node_destroy(struct rlite *db, void *node);
-int rl_list_get_element(struct rlite *db, rl_list *list, void **element, long position);
-int rl_list_add_element(struct rlite *db, rl_list *list, long list_page, void *element, long position);
-int rl_list_remove_element(struct rlite *db, rl_list *list, long list_page, long position);
-int rl_list_find_element(struct rlite *db, rl_list *list, void *element, void **found_element, long *position, rl_list_node **found_node, long *found_node_page);
+int rl_list_get_element(struct rlite *db, rl_list *list, void **element, int64_t position);
+int rl_list_add_element(struct rlite *db, rl_list *list, int64_t list_page, void *element, int64_t position);
+int rl_list_remove_element(struct rlite *db, rl_list *list, int64_t list_page, int64_t position);
+int rl_list_find_element(struct rlite *db, rl_list *list, void *element, void **found_element, int64_t *position, rl_list_node **found_node, int64_t *found_node_page);
 int rl_list_iterator_create(struct rlite *db, rl_list_iterator **iterator, rl_list *list, int direction);
 int rl_list_iterator_destroy(struct rlite *db, rl_list_iterator *iterator);
 int rl_list_iterator_next(rl_list_iterator *iterator, void **element);

@@ -9,7 +9,7 @@
 
 #define PRINT(str, strlen)\
 	{\
-		long i;\
+		int64_t i;\
 		for (i = 0; i < strlen; i++) {\
 			fprintf(stderr, "\\x%.2x", str[i]);\
 		}\
@@ -44,7 +44,7 @@
 	int retval;\
 	rlite *db = NULL;\
 	unsigned char *key = UNSIGN("mykey"), *testvalue;\
-	long keylen = 5, testvaluelen;\
+	int64_t keylen = 5, testvaluelen;\
 	RL_CALL_VERBOSE(rl_open, RL_OK, ":memory:", &db, RLITE_OPEN_READWRITE | RLITE_OPEN_CREATE);
 
 TEST test_string()
@@ -73,7 +73,7 @@ TEST test_list()
 	INIT();
 
 	unsigned char *values[2] = {UNSIGN("b"), UNSIGN("a")};
-	long valueslen[2] = {1, 1};
+	int64_t valueslen[2] = {1, 1};
 	RL_CALL_VERBOSE(rl_push, RL_OK, db, key, keylen, 1, 0, 2, values, valueslen, NULL);
 	RL_CALL_VERBOSE(rl_dump, RL_OK, db, key, keylen, &testvalue, &testvaluelen);
 	EXPECT_BYTES(UNSIGN("\x01\x80\x00\x00\x00\x02\x80\x00\x00\x00\x01\x62\x80\x00\x00\x00\x01\x61\x06\x00\x94\x46\xb5\x94\x1e\x1e_K"), 28, testvalue, testvaluelen);
@@ -88,7 +88,7 @@ TEST test_list_oom()
 	INIT();
 
 	unsigned char *values[2] = {UNSIGN("b"), UNSIGN("a")};
-	long valueslen[2] = {1, 1};
+	int64_t valueslen[2] = {1, 1};
 	RL_CALL_VERBOSE(rl_push, RL_OK, db, key, keylen, 1, 0, 2, values, valueslen, NULL);
 	OOM();
 }
@@ -99,7 +99,7 @@ TEST test_set()
 	INIT();
 
 	unsigned char *values[2] = {UNSIGN("b"), UNSIGN("a")};
-	long valueslen[2] = {1, 1};
+	int64_t valueslen[2] = {1, 1};
 	RL_CALL_VERBOSE(rl_sadd, RL_OK, db, key, keylen, 2, values, valueslen, NULL);
 	RL_CALL_VERBOSE(rl_dump, RL_OK, db, key, keylen, &testvalue, &testvaluelen);
 	EXPECT_BYTES(UNSIGN("\x02\x80\x00\x00\x00\x02\x80\x00\x00\x00\x01\x61\x80\x00\x00\x00\x01\x62\x06\x00\xbb\x8c\x8c\xcf\x86{ \xfd"), 28, testvalue, testvaluelen);
@@ -114,7 +114,7 @@ TEST test_set_oom()
 	INIT();
 
 	unsigned char *values[2] = {UNSIGN("b"), UNSIGN("a")};
-	long valueslen[2] = {1, 1};
+	int64_t valueslen[2] = {1, 1};
 	RL_CALL_VERBOSE(rl_sadd, RL_OK, db, key, keylen, 2, values, valueslen, NULL);
 	OOM();
 }

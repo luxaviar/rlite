@@ -16,10 +16,10 @@ TEST basic_skiplist_test(int sign, int commit)
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, commit, 1);
 	rl_skiplist *skiplist;
 	RL_CALL_VERBOSE(rl_skiplist_create, RL_OK, db, &skiplist);
-	long skiplist_page = db->next_empty_page;
+	int64_t skiplist_page = db->next_empty_page;
 	RL_CALL_VERBOSE(rl_write, RL_OK, db, &rl_data_type_skiplist, skiplist_page, skiplist);
 
-	long i;
+	int64_t i;
 	unsigned char *data = malloc(sizeof(unsigned char) * 1);
 	for (i = 0; i < TEST_SIZE; i++) {
 		data[0] = i;
@@ -43,12 +43,12 @@ TEST basic_skiplist_first_node_test()
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, 0, 1);
 	rl_skiplist *skiplist;
 	rl_skiplist_node *node;
-	long rank;
+	int64_t rank;
 	RL_CALL_VERBOSE(rl_skiplist_create, RL_OK, db, &skiplist);
-	long skiplist_page = db->next_empty_page;
+	int64_t skiplist_page = db->next_empty_page;
 	RL_CALL_VERBOSE(rl_write, RL_OK, db, &rl_data_type_skiplist, skiplist_page, skiplist);
 
-	long i, size;
+	int64_t i, size;
 	unsigned char *data = malloc(sizeof(unsigned char) * 1);
 	unsigned char *data2;
 	for (i = 0; i < 10; i++) {
@@ -88,10 +88,10 @@ TEST basic_skiplist_delete_node_test(int commit)
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, 0, 1);
 	rl_skiplist *skiplist;
 	RL_CALL_VERBOSE(rl_skiplist_create, RL_OK, db, &skiplist);
-	long skiplist_page = db->next_empty_page;
+	int64_t skiplist_page = db->next_empty_page;
 	RL_CALL_VERBOSE(rl_write, RL_OK, db, &rl_data_type_skiplist, skiplist_page, skiplist);
 
-	long i;
+	int64_t i;
 	unsigned char *data[10];
 	for (i = 0; i < 10; i++) {
 		data[i] = malloc(sizeof(unsigned char) * 1);
@@ -136,10 +136,10 @@ TEST basic_skiplist_node_by_rank()
 	rl_skiplist *skiplist;
 	rl_skiplist_node *node;
 	RL_CALL_VERBOSE(rl_skiplist_create, RL_OK, db, &skiplist);
-	long skiplist_page = db->next_empty_page;
+	int64_t skiplist_page = db->next_empty_page;
 	RL_CALL_VERBOSE(rl_write, RL_OK, db, &rl_data_type_skiplist, skiplist_page, skiplist);
 
-	long i;
+	int64_t i;
 	unsigned char *data = malloc(sizeof(unsigned char) * 1);
 	for (i = 0; i < TEST_SIZE; i++) {
 		data[0] = i;
@@ -164,11 +164,11 @@ TEST basic_skiplist_iterator_test(int commit)
 	rl_skiplist *skiplist;
 	rl_skiplist_node *node;
 	RL_CALL_VERBOSE(rl_skiplist_create, RL_OK, db, &skiplist);
-	long skiplist_page = db->next_empty_page;
+	int64_t skiplist_page = db->next_empty_page;
 	RL_CALL_VERBOSE(rl_write, RL_OK, db, &rl_data_type_skiplist, skiplist_page, skiplist);
 
 	int cmp;
-	long i;
+	int64_t i;
 	unsigned char *data = malloc(sizeof(unsigned char) * 1);
 	for (i = 0; i < TEST_SIZE; i++) {
 		data[0] = i;
@@ -177,7 +177,7 @@ TEST basic_skiplist_iterator_test(int commit)
 
 	RL_CALL_VERBOSE(rl_skiplist_iterator_create, RL_OK, db, &iterator, skiplist, 0, 0, 0);
 
-	long random_node = 0;
+	int64_t random_node = 0;
 	i = 0;
 	while ((retval = rl_skiplist_iterator_next(iterator, &node)) == RL_OK) {
 		if (i == TEST_SIZE / 2 - 1) {

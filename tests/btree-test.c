@@ -24,7 +24,7 @@ TEST btree_create_oom()
 {
 	rl_btree *btree = NULL;
 	int i, retval;
-	long btree_node_size = 10;
+	int64_t btree_node_size = 10;
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, 0, 1);
 	for (i = 1; ;i++) {
@@ -49,27 +49,27 @@ TEST btree_create_oom()
 
 TEST btree_insert_oom()
 {
-	long btree_node_size = 2;
+	int64_t btree_node_size = 2;
 	rl_btree *btree = NULL;
 	int retval;
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, 0, 1);
 
-	long *key;
-	long *val;
+	int64_t *key;
+	int64_t *val;
 
-	long j, i;
+	int64_t j, i;
 	int finished = 0;
 	for (j = 1; !finished; j++) {
 		for (i = 0; i < 7; i++) {
 			test_mode = 0;
 			RL_CALL_VERBOSE(rl_btree_create_size, RL_OK, db, &btree, &rl_btree_type_hash_long_long, btree_node_size);
-			long btree_page = db->next_empty_page;
+			int64_t btree_page = db->next_empty_page;
 			RL_CALL_VERBOSE(rl_write, RL_OK, db, btree->type->btree_type, btree_page, btree);
 			test_mode = 1;
 			test_mode_counter = j;
-			key = malloc(sizeof(long));
-			val = malloc(sizeof(long));
+			key = malloc(sizeof(int64_t));
+			val = malloc(sizeof(int64_t));
 			*key = i + 1;
 			*val = i * 10;
 			CHECK_RETVAL(rl_btree_add_element(db, btree, btree_page, key, val), RL_OK);
@@ -93,24 +93,24 @@ TEST btree_insert_oom()
 
 TEST btree_find_oom()
 {
-	long btree_node_size = 2;
+	int64_t btree_node_size = 2;
 	INIT();
 
-	long btree_page = db->next_empty_page;
+	int64_t btree_page = db->next_empty_page;
 	RL_CALL_VERBOSE(rl_write, RL_OK, db, btree->type->btree_type, btree_page, btree);
-	long i;
-	long **keys = malloc(sizeof(long *) * 7);
-	long **vals = malloc(sizeof(long *) * 7);
+	int64_t i;
+	int64_t **keys = malloc(sizeof(int64_t *) * 7);
+	int64_t **vals = malloc(sizeof(int64_t *) * 7);
 	for (i = 0; i < 7; i++) {
-		keys[i] = malloc(sizeof(long));
-		vals[i] = malloc(sizeof(long));
+		keys[i] = malloc(sizeof(int64_t));
+		vals[i] = malloc(sizeof(int64_t));
 		*keys[i] = i + 1;
 		*vals[i] = i * 10;
 		RL_CALL_VERBOSE(rl_btree_add_element, RL_OK, db, btree, btree_page, keys[i], vals[i]);
 		RL_CALL_VERBOSE(rl_btree_is_balanced, RL_OK, db, btree);
 	}
 
-	long nonexistent_vals[2] = {0, 8};
+	int64_t nonexistent_vals[2] = {0, 8};
 	test_mode = 1;
 	test_mode_counter = 1;
 	for (i = 0; i < 7; i++) {
@@ -137,17 +137,17 @@ TEST btree_find_oom()
 
 TEST basic_insert_hash_test()
 {
-	long btree_node_size = 2;
+	int64_t btree_node_size = 2;
 	INIT();
-	long **keys = malloc(sizeof(long *) * 7);
-	long **vals = malloc(sizeof(long *) * 7);
+	int64_t **keys = malloc(sizeof(int64_t *) * 7);
+	int64_t **vals = malloc(sizeof(int64_t *) * 7);
 
-	long btree_page = db->next_empty_page;
+	int64_t btree_page = db->next_empty_page;
 	RL_CALL_VERBOSE(rl_write, RL_OK, db, btree->type->btree_type, btree_page, btree);
-	long i;
+	int64_t i;
 	for (i = 0; i < 7; i++) {
-		keys[i] = malloc(sizeof(long));
-		vals[i] = malloc(sizeof(long));
+		keys[i] = malloc(sizeof(int64_t));
+		vals[i] = malloc(sizeof(int64_t));
 		*keys[i] = i + 1;
 		*vals[i] = i * 10;
 		RL_CALL_VERBOSE(rl_btree_add_element, RL_OK, db, btree, btree_page, keys[i], vals[i]);
@@ -158,9 +158,9 @@ TEST basic_insert_hash_test()
 	for (i = 0; i < 7; i++) {
 		RL_CALL_VERBOSE(rl_btree_find_score, RL_FOUND, db, btree, keys[i], &val, NULL, NULL);
 		EXPECT_PTR(val, vals[i]);
-		EXPECT_LONG(*(long *)val, i * 10);
+		EXPECT_LONG(*(int64_t *)val, i * 10);
 	}
-	long nonexistent_vals[2] = {0, 8};
+	int64_t nonexistent_vals[2] = {0, 8};
 	for (i = 0; i < 2; i++) {
 		RL_CALL_VERBOSE(rl_btree_find_score, RL_NOT_FOUND, db, btree, &nonexistent_vals[i], NULL, NULL, NULL);
 	}
@@ -172,18 +172,18 @@ cleanup:
 	if (retval == 0) { PASS(); } else { FAIL(); }
 }
 
-TEST random_hash_test(long size, long btree_node_size)
+TEST random_hash_test(int64_t size, int64_t btree_node_size)
 {
 	INIT();
-	long *key, *val;
+	int64_t *key, *val;
 	int *results = malloc(sizeof(int) * size);
-	long btree_page = db->next_empty_page;
+	int64_t btree_page = db->next_empty_page;
 	RL_CALL_VERBOSE(rl_write, RL_OK, db, btree->type->btree_type, btree_page, btree);
-	long i;
+	int64_t i;
 	for (i = 0; i < size; i++) {
 		results[i] = 0;
-		key = malloc(sizeof(long));
-		val = malloc(sizeof(long));
+		key = malloc(sizeof(int64_t));
+		val = malloc(sizeof(int64_t));
 		*key = i;
 		*val = i * 10;
 		RL_CALL_VERBOSE(rl_btree_add_element, RL_OK, db, btree, btree_page, key, val);
@@ -211,9 +211,9 @@ cleanup:
 	if (retval == 0) { PASS(); } else { FAIL(); }
 }
 
-static int contains_element(long element, long *elements, long size)
+static int contains_element(int64_t element, int64_t *elements, int64_t size)
 {
-	long i;
+	int64_t i;
 	for (i = 0; i < size; i++) {
 		if (elements[i] == element) {
 			return 1;
@@ -222,21 +222,21 @@ static int contains_element(long element, long *elements, long size)
 	return 0;
 }
 
-TEST fuzzy_hash_test(long size, long btree_node_size, int _commit)
+TEST fuzzy_hash_test(int64_t size, int64_t btree_node_size, int _commit)
 {
 	INIT();
 
-	long *elements = malloc(sizeof(long) * size);
-	long *nonelements = malloc(sizeof(long) * size);
-	long *values = malloc(sizeof(long) * size);
+	int64_t *elements = malloc(sizeof(int64_t) * size);
+	int64_t *nonelements = malloc(sizeof(int64_t) * size);
+	int64_t *values = malloc(sizeof(int64_t) * size);
 	void **flatten_scores = malloc(sizeof(void *) * size);
 
-	long btree_page = db->next_empty_page;
+	int64_t btree_page = db->next_empty_page;
 	RL_CALL_VERBOSE(rl_write, RL_OK, db, btree->type->btree_type, btree_page, btree);
 
-	long i, element, value, *element_copy, *value_copy;
+	int64_t i, element, value, *element_copy, *value_copy;
 
-	long j, flatten_size;
+	int64_t j, flatten_size;
 
 	void *val, *tmp;
 
@@ -250,10 +250,10 @@ TEST fuzzy_hash_test(long size, long btree_node_size, int _commit)
 		else {
 			RL_CALL_VERBOSE(rl_read, RL_FOUND, db, &rl_data_type_btree_hash_long_long, btree_page, &rl_btree_type_hash_long_long, &tmp, 1);
 			elements[i] = element;
-			element_copy = malloc(sizeof(long));
+			element_copy = malloc(sizeof(int64_t));
 			*element_copy = element;
 			values[i] = value;
-			value_copy = malloc(sizeof(long));
+			value_copy = malloc(sizeof(int64_t));
 			*value_copy = value;
 			RL_CALL_VERBOSE(rl_btree_add_element, RL_OK, db, btree, btree_page, element_copy, value_copy);
 			RL_CALL_VERBOSE(rl_btree_is_balanced, RL_OK, db, btree);
@@ -261,7 +261,7 @@ TEST fuzzy_hash_test(long size, long btree_node_size, int _commit)
 		flatten_size = 0;
 		RL_CALL_VERBOSE(rl_flatten_btree, RL_OK, db, btree, &flatten_scores, &flatten_size);
 		for (j = 1; j < flatten_size; j++) {
-			if (*(long *)flatten_scores[j - 1] >= *(long *)flatten_scores[j]) {
+			if (*(int64_t *)flatten_scores[j - 1] >= *(int64_t *)flatten_scores[j]) {
 				fprintf(stderr, "Tree is in a bad state in element %ld after adding child %ld\n", j, i);
 				retval = RL_UNEXPECTED;
 				goto cleanup;
@@ -286,7 +286,7 @@ TEST fuzzy_hash_test(long size, long btree_node_size, int _commit)
 
 	for (i = 0; i < size; i++) {
 		RL_CALL_VERBOSE(rl_btree_find_score, RL_FOUND, db, btree, &elements[i], &val, NULL, NULL);
-		EXPECT_LONG(*(long *)val, values[i]);
+		EXPECT_LONG(*(int64_t *)val, values[i]);
 		RL_CALL_VERBOSE(rl_btree_find_score, RL_NOT_FOUND, db, btree, &nonelements[i], NULL, NULL, NULL);
 	}
 
@@ -300,24 +300,24 @@ cleanup:
 	if (retval == 0) { PASS(); } else { FAIL(); }
 }
 
-TEST fuzzy_hash_test_iterator(long size, long btree_node_size, int _commit)
+TEST fuzzy_hash_test_iterator(int64_t size, int64_t btree_node_size, int _commit)
 {
 	INIT();
 
 	rl_btree_iterator *iterator = NULL;
-	long *elements = malloc(sizeof(long) * size);
-	long *nonelements = malloc(sizeof(long) * size);
-	long *values = malloc(sizeof(long) * size);
+	int64_t *elements = malloc(sizeof(int64_t) * size);
+	int64_t *nonelements = malloc(sizeof(int64_t) * size);
+	int64_t *values = malloc(sizeof(int64_t) * size);
 
-	long btree_page = db->next_empty_page;
+	int64_t btree_page = db->next_empty_page;
 	RL_CALL_VERBOSE(rl_write, RL_OK, db, btree->type->btree_type, btree_page, btree);
 
-	long i, element, value, *element_copy, *value_copy;
+	int64_t i, element, value, *element_copy, *value_copy;
 
-	long j;
+	int64_t j;
 
 	void *tmp;
-	long prev_score = -1.0, score;
+	int64_t prev_score = -1.0, score;
 
 	for (i = 0; i < size; i++) {
 		element = rand();
@@ -328,10 +328,10 @@ TEST fuzzy_hash_test_iterator(long size, long btree_node_size, int _commit)
 		}
 		else {
 			elements[i] = element;
-			element_copy = malloc(sizeof(long));
+			element_copy = malloc(sizeof(int64_t));
 			*element_copy = element;
 			values[i] = value;
-			value_copy = malloc(sizeof(long));
+			value_copy = malloc(sizeof(int64_t));
 			*value_copy = value;
 			RL_CALL_VERBOSE(rl_btree_add_element, RL_OK, db, btree, btree_page, element_copy, value_copy);
 			RL_CALL_VERBOSE(rl_btree_is_balanced, RL_OK, db, btree);
@@ -342,7 +342,7 @@ TEST fuzzy_hash_test_iterator(long size, long btree_node_size, int _commit)
 
 		j = 0;
 		while (RL_OK == (retval = rl_btree_iterator_next(iterator, &tmp, NULL))) {
-			score = *(long *)tmp;
+			score = *(int64_t *)tmp;
 			rl_free(tmp);
 			if (j++ > 0) {
 				if (prev_score >= score) {
@@ -386,7 +386,7 @@ cleanup:
 SUITE(btree_test)
 {
 	int i, j, k;
-	long size, btree_node_size;
+	int64_t size, btree_node_size;
 	int commit;
 	RUN_TEST(basic_insert_hash_test);
 	RUN_TESTp(random_hash_test, 10, 2);
@@ -397,7 +397,7 @@ SUITE(btree_test)
 	RUN_TEST(btree_find_oom);
 #endif
 
-	long delete_tests[DELETE_TESTS_COUNT][2] = {
+	int64_t delete_tests[DELETE_TESTS_COUNT][2] = {
 		{8, 8},
 		{ -8, -5},
 		{8, 5},

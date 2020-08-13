@@ -160,11 +160,11 @@ int rl_stringmatchlen(const char *pattern, int patternLen,
 
 // Adapted from https://github.com/antirez/redis/blob/unstable/src/bitops.c#L287
 /* BITOP op_name target_key src_key1 src_key2 src_key3 ... src_keyN */
-void rl_internal_bitop(int op, unsigned long numkeys, unsigned char **objects, unsigned long *objectslen, unsigned char **result, long *resultlen)
+void rl_internal_bitop(int op, uint64_t numkeys, unsigned char **objects, uint64_t *objectslen, unsigned char **result, int64_t *resultlen)
 {
-    unsigned long j;
-    unsigned long maxlen = 0; /* Array of length of src strings, and max len. */
-    unsigned long minlen = 0; /* Min len among the input keys. */
+    uint64_t j;
+    uint64_t maxlen = 0; /* Array of length of src strings, and max len. */
+    uint64_t minlen = 0; /* Min len among the input keys. */
     unsigned char *res = NULL; /* Resulting string. */
 
 
@@ -178,22 +178,22 @@ void rl_internal_bitop(int op, unsigned long numkeys, unsigned char **objects, u
     if (maxlen) {
         res = (unsigned char *)rl_malloc(sizeof(unsigned char) * maxlen);
         unsigned char output, byte;
-        unsigned long i;
+        uint64_t i;
 
         /* Fast path: as far as we have data for all the input bitmaps we
          * can take a fast path that performs much better than the
          * vanilla algorithm. */
         j = 0;
         if (minlen && numkeys <= 16) {
-            unsigned long *lp[16];
-            unsigned long *lres = (unsigned long*) res;
+            uint64_t *lp[16];
+            uint64_t *lres = (uint64_t*) res;
 
-            memcpy(lp, objects, sizeof(unsigned long*) * numkeys);
+            memcpy(lp, objects, sizeof(uint64_t*) * numkeys);
             memcpy(res, objects[0], minlen);
 
             /* Different branches per different operations for speed (sorry). */
             if (op == BITOP_AND) {
-                while(minlen >= sizeof(unsigned long)*4) {
+                while(minlen >= sizeof(uint64_t)*4) {
                     for (i = 1; i < numkeys; i++) {
                         lres[0] &= lp[i][0];
                         lres[1] &= lp[i][1];
@@ -202,11 +202,11 @@ void rl_internal_bitop(int op, unsigned long numkeys, unsigned char **objects, u
                         lp[i]+=4;
                     }
                     lres+=4;
-                    j += sizeof(unsigned long)*4;
-                    minlen -= sizeof(unsigned long)*4;
+                    j += sizeof(uint64_t)*4;
+                    minlen -= sizeof(uint64_t)*4;
                 }
             } else if (op == BITOP_OR) {
-                while(minlen >= sizeof(unsigned long)*4) {
+                while(minlen >= sizeof(uint64_t)*4) {
                     for (i = 1; i < numkeys; i++) {
                         lres[0] |= lp[i][0];
                         lres[1] |= lp[i][1];
@@ -215,11 +215,11 @@ void rl_internal_bitop(int op, unsigned long numkeys, unsigned char **objects, u
                         lp[i]+=4;
                     }
                     lres+=4;
-                    j += sizeof(unsigned long)*4;
-                    minlen -= sizeof(unsigned long)*4;
+                    j += sizeof(uint64_t)*4;
+                    minlen -= sizeof(uint64_t)*4;
                 }
             } else if (op == BITOP_XOR) {
-                while(minlen >= sizeof(unsigned long)*4) {
+                while(minlen >= sizeof(uint64_t)*4) {
                     for (i = 1; i < numkeys; i++) {
                         lres[0] ^= lp[i][0];
                         lres[1] ^= lp[i][1];
@@ -228,18 +228,18 @@ void rl_internal_bitop(int op, unsigned long numkeys, unsigned char **objects, u
                         lp[i]+=4;
                     }
                     lres+=4;
-                    j += sizeof(unsigned long)*4;
-                    minlen -= sizeof(unsigned long)*4;
+                    j += sizeof(uint64_t)*4;
+                    minlen -= sizeof(uint64_t)*4;
                 }
             } else if (op == BITOP_NOT) {
-                while(minlen >= sizeof(unsigned long)*4) {
+                while(minlen >= sizeof(uint64_t)*4) {
                     lres[0] = ~lres[0];
                     lres[1] = ~lres[1];
                     lres[2] = ~lres[2];
                     lres[3] = ~lres[3];
                     lres+=4;
-                    j += sizeof(unsigned long)*4;
-                    minlen -= sizeof(unsigned long)*4;
+                    j += sizeof(uint64_t)*4;
+                    minlen -= sizeof(uint64_t)*4;
                 }
             }
         }
@@ -268,14 +268,14 @@ void rl_internal_bitop(int op, unsigned long numkeys, unsigned char **objects, u
 /* Count number of bits set in the binary array pointed by 's' and long
  * 'count' bytes. The implementation of this function is required to
  * work with a input string length up to 512 MB. */
-size_t rl_redisPopcount(void *s, long count) {
+size_t rl_redisPopcount(void *s, int64_t count) {
     size_t bits = 0;
     unsigned char *p = s;
     uint32_t *p4;
     static const unsigned char bitsinbyte[256] = {0,1,1,2,1,2,2,3,1,2,2,3,2,3,3,4,1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,1,2,2,3,2,3,3,4,2,3,3,4,3,4,4,5,2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,2,3,3,4,3,4,4,5,3,4,4,5,4,5,5,6,3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,3,4,4,5,4,5,5,6,4,5,5,6,5,6,6,7,4,5,5,6,5,6,6,7,5,6,6,7,6,7,7,8};
 
     /* Count initial bytes not aligned to 32 bit. */
-    while((unsigned long)p & 3 && count) {
+    while((uint64_t)p & 3 && count) {
         bits += bitsinbyte[*p++];
         count--;
     }
@@ -312,18 +312,18 @@ size_t rl_redisPopcount(void *s, long count) {
 
 // https://github.com/antirez/redis/blob/unstable/src/bitops.c#L110
 /* Return the position of the first bit set to one (if 'bit' is 1) or
- * zero (if 'bit' is 0) in the bitmap starting at 's' and long 'count' bytes.
+ * zero (if 'bit' is 0) in the bitmap starting at 's' and int64_t 'count' bytes.
  *
  * The function is guaranteed to return a value >= 0 if 'bit' is 0 since if
  * no zero bit is found, it returns count*8 assuming the string is zero
  * padded on the right. However if 'bit' is 1 it is possible that there is
  * not a single set bit in the bitmap. In this special case -1 is returned. */
-long rl_internal_bitpos(void *s, unsigned long count, int bit) {
-    unsigned long *l;
+int64_t rl_internal_bitpos(void *s, uint64_t count, int bit) {
+    uint64_t *l;
     unsigned char *c;
-    unsigned long skipval, word = 0, one;
-    long pos = 0; /* Position of bit, to return to the caller. */
-    unsigned long j;
+    uint64_t skipval, word = 0, one;
+    int64_t pos = 0; /* Position of bit, to return to the caller. */
+    uint64_t j;
 
     /* Process whole words first, seeking for first word that is not
      * all ones or all zeros respectively if we are lookig for zeros
@@ -331,13 +331,13 @@ long rl_internal_bitpos(void *s, unsigned long count, int bit) {
      * blocks of 1 or 0 bits compared to the vanilla bit per bit processing.
      *
      * Note that if we start from an address that is not aligned
-     * to sizeof(unsigned long) we consume it byte by byte until it is
+     * to sizeof(uint64_t) we consume it byte by byte until it is
      * aligned. */
 
-    /* Skip initial bits not aligned to sizeof(unsigned long) byte by byte. */
+    /* Skip initial bits not aligned to sizeof(uint64_t) byte by byte. */
     skipval = bit ? 0 : UCHAR_MAX;
     c = (unsigned char*) s;
-    while((unsigned long)c & (sizeof(*l)-1) && count) {
+    while((uint64_t)c & (sizeof(*l)-1) && count) {
         if (*c != skipval) break;
         c++;
         count--;
@@ -345,8 +345,8 @@ long rl_internal_bitpos(void *s, unsigned long count, int bit) {
     }
 
     /* Skip bits with full word step. */
-    skipval = bit ? 0 : ULONG_MAX;
-    l = (unsigned long*) c;
+    skipval = bit ? 0 : ULLONG_MAX;
+    l = (uint64_t*) c;
     while (count >= sizeof(*l)) {
         if (*l != skipval) break;
         l++;
@@ -380,9 +380,9 @@ long rl_internal_bitpos(void *s, unsigned long count, int bit) {
 
     /* Last word left, scan bit by bit. The first thing we need is to
      * have a single "1" set in the most significant position in an
-     * unsigned long. We don't know the size of the long so we use a
+     * uint64_t. We don't know the size of the int64_t so we use a
      * simple trick. */
-    one = ULONG_MAX; /* All bits set to 1.*/
+    one = ULLONG_MAX; /* All bits set to 1.*/
     one >>= 1;       /* All bits set to 1 but the MSB. */
     one = ~one;      /* All bits set to 0 but the MSB. */
 

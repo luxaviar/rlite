@@ -15,7 +15,7 @@ TEST do_string_test()
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, 0, 1);
 
 	unsigned char *data, *data2;
-	long number, i;
+	int64_t number, i;
 
 	RL_CALL_VERBOSE(rl_string_create, RL_OK, db, &data, &number);
 

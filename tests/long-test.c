@@ -12,8 +12,8 @@ TEST do_long_test(int _commit)
 	rlite *db = NULL;
 	RL_CALL_VERBOSE(setup_db, RL_OK, &db, _commit, 1);
 
-	long data = 123, data2;
-	long number;
+	int64_t data = 123, data2;
+	int64_t number;
 
 	RL_CALL_VERBOSE(rl_long_create, RL_OK, db, data, &number);
 	RL_COMMIT();

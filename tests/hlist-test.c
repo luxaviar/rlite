@@ -270,7 +270,7 @@ TEST test_lindex() {
 TEST test_linsert() {
 	rliteContext *context = rliteConnect(":memory:", 0);
 
-	long i;
+	int64_t i;
 	char *values[3] = {"value1", "value2", "othervalue"};
 	char *key = "mylist";
 
@@ -306,7 +306,7 @@ TEST test_linsert() {
 TEST test_lrange() {
 	rliteContext *context = rliteConnect(":memory:", 0);
 
-	long i;
+	int64_t i;
 	char *values[3] = {"value1", "value2", "othervalue"};
 	char *key = "mylist";
 
